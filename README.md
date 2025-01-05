@@ -1,4 +1,4 @@
-This is a Linux GUI for easier control of both USBIP and Pipewire services (specifically a microphone currently).
+This is a Linux GUI for easier control of both USBIP and Pipewire services (currently designed for a microphone).
 
 My Specific Use Case: 
 I designed this because I want to use multiple USB devices and a microphone while game streaming with Moonlght/Sunshine on devices that don't allow device passthrough.
