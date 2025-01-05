@@ -25,7 +25,7 @@ How to use:
 
 ![400256894-64af2702-612b-48e0-8abf-1fd99f2e26db](https://github.com/user-attachments/assets/931dbcaf-54c0-4878-9414-56b4f641dd81)
 
-![400256932-3b5e539d-89fa-42e9-b17e-81459cd13d1c](https://github.com/user-attachments/assets/3c0a8671-b301-4b32-93ce-2f11b469867e)
+![400256932-3b5e539d-89fa-42e9-b17e-81459cd13d1c](https://github.com/user-attachments/assets/f4dc563a-a164-42b1-a8b7-590ee552a356)
 
 To do:
 - Make USBIP Auto-Connect more automatic. (Currently only auto connects when it starts/on refresh)
