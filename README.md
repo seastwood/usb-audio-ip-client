@@ -43,3 +43,4 @@ To do:
 - Improve documentation.
 - Refactor Classes and Methods.
 - Make more object oriented.
+- Better Error Handling
