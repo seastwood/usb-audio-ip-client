@@ -19,7 +19,7 @@ How to use:
 - If Pipewire is set up correctly and audio devices are available, devices should appear in the list.
   - You will want to link the INPUT device (if one is plugged in) to the SINK device you configured.
     - The configured sink device may not appear without an output device connected to the host.
-    - I am using a usb audio adapter with both a separate microphone and speaker plugs.
+    - I am using a usb audio adapter with both a separate microphone and speaker plug.
     - I found that a headphone/headset adapter works as well.
   - Then click "Restart Client PW" to allow the client to sync with the new host the PW streamed to your new rtp-source input device on the client.
 
