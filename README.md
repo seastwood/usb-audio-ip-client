@@ -21,7 +21,7 @@ How to use:
 - If Pipewire is set up correctly and audio devices are available, devices should appear in the list.
   - You will want to link the INPUT device (if one is plugged in) to the SINK device you configured.
     - The configured sink device may not appear without an output device connected to the host.
-    - I am using a usb audio adapter with both a separate microphone and speaker plug.
+    - I am using a usb audio adapter with both a separate microphone and speaker plug, on which I only need to have a microphone plugged in.
     - I found that a headset adapter with a headset plugged in works as well.
     - This is not configured to send audio back to the host.
       - I stream the sound output through Moonlight, which needs to be restarted after this is set up to get the Sunshine Sink Streams to re-initialize because we restarted the Pipewire service.
