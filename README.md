@@ -23,6 +23,8 @@ How to use:
     - The configured sink device may not appear without an output device connected to the host.
     - I am using a usb audio adapter with both a separate microphone and speaker plug.
     - I found that a headset adapter with a headset plugged in works as well.
+    - This is not configured to send audio back to the host.
+      - I stream the sound output through Moonlight, which needs to be restarted after this is set up to get the Sunshine Sink Streams to re-initialize because we restarted the Pipewire service.
   - Then click "Restart Client PW" to allow the client to sync with the new host the PW streamed to your new rtp-source input device on the client.
 
 ![400256855-8b6d3345-bc59-4f34-8420-3544ef35bbb2](https://github.com/user-attachments/assets/fc5b1639-60f7-4bea-a94e-6283c33fc6bd)
