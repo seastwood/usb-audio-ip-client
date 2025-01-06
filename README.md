@@ -8,6 +8,8 @@ me to remotely interact on Discord with a push to talk button on the controller.
 
 Special thanks to the developers of USBIP and Pipewire for making this possible.
 
+Note: Only tested on openSUSE
+
 How to use:
 - You must have ssh, Pipewire, and USBIP installed, enabled and started on the host device.
 - Pipewire and USBIP must also be installed, enabled, and started on the client device.
