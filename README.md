@@ -9,8 +9,8 @@ me to remotely interact on Discord with a push to talk button on the controller.
 Special thanks to the developers of USBIP and Pipewire for making this possible.
 
 How to use:
-- You must have ssh, Pipewire, and USBIP installed and enabled on the host device.
-- Pipewire and USBIP must also be installed and enabled on the client device.
+- You must have ssh, Pipewire, and USBIP installed and enabled/started on the host device.
+- Pipewire and USBIP must also be installed and enabled/started on the client device.
 - Download and run the executabe inside the dist folder.
 - Add host ip, username, and password.
 - If USBIP is set up correctly and USB devices are available on the host, devices should appear.
