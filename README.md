@@ -11,6 +11,7 @@ Special thanks to the developers of USBIP and Pipewire for making this possible.
 How to use:
 - You must have ssh, Pipewire, and USBIP installed, enabled and started on the host device.
 - Pipewire and USBIP must also be installed, enabled, and started on the client device.
+ - Make sure he usbip driver is loaded: `sudo modprobe vhci_hcd`
 - Download and run the executabe inside the dist folder.
 - Add host ip, username, and password.
 - If USBIP is set up correctly and USB devices are available on the host, devices should appear.
