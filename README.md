@@ -22,7 +22,7 @@ How to use:
   - You will want to link the INPUT device (if one is plugged in) to the SINK device you configured.
     - The configured sink device may not appear without an output device connected to the host.
     - I am using a usb audio adapter with both a separate microphone and speaker plug.
-    - I found that a headphone/headset adapter works as well.
+    - I found that a headset adapter with a headset plugged in works as well.
   - Then click "Restart Client PW" to allow the client to sync with the new host the PW streamed to your new rtp-source input device on the client.
 
 ![400256855-8b6d3345-bc59-4f34-8420-3544ef35bbb2](https://github.com/user-attachments/assets/fc5b1639-60f7-4bea-a94e-6283c33fc6bd)
