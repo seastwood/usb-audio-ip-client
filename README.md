@@ -46,3 +46,4 @@ To do:
 - Refactor Classes and Methods.
 - Make more object oriented.
 - Better Error Handling
+- More Feedback Messages
