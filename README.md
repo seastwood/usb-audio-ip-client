@@ -15,7 +15,7 @@ Note:
 How to use:
 - You must have ssh, Pipewire, and USBIP installed, enabled and started on the host device.
 - Pipewire and USBIP must also be installed, enabled, and started on the client device.
-  - Make sure he usbip driver is loaded: `sudo modprobe vhci_hcd`
+  - Make sure the usbip driver is loaded: `sudo modprobe vhci_hcd`
 - I recommend testing pipewire and usbip connections from the terminal to ensure your set up is working.
 - Download and run the executabe inside the dist folder.
 - Add host ip, username, and password.
