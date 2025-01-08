@@ -14,8 +14,19 @@ Note:
 
 How to use:
 - You must have ssh, Pipewire, and USBIP installed, enabled and started on the host device.
+  - Make sure the usbip drivers are loaded:
+    - `sudo modprobe vhci_hcd`
+    - `sudo modprobe usbip_host`
+    - To make them load on boot: `sudo nano /etc/modules-load.d/usbip.conf`
+      - Add to file: `vhci_hcd` and `usbip_host`
 - Pipewire and USBIP must also be installed, enabled, and started on the client device.
-  - Make sure the usbip driver is loaded: `sudo modprobe vhci_hcd`
+  - Make sure the usbip driver is loaded:
+    - `sudo modprobe vhci_hcd`
+    - To make them load on boot: `sudo nano /etc/modules-load.d/usbip.conf`
+      - Add to file: `vhci_hcd`
+  - USBIP requires sudo to connect to devices. You can edit the sudoers file if you trust it (only way to use this gui currently)
+    - run: `sudo visudo`
+    - Add to bottom of file: `<username> ALL=(ALL) NOPASSWD: /usr/sbin/usbip`
 - I recommend testing pipewire and usbip connections from the terminal to ensure your set up is working.
 - Download and run the executabe inside the dist folder.
 - Add host ip, username, and password.
