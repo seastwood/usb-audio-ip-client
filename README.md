@@ -26,7 +26,7 @@ How to use:
       - Add to file: `vhci_hcd`
   - USBIP requires sudo to connect to devices. You can edit the sudoers file if you trust it (only way to use this gui currently)
     - run: `sudo visudo`
-    - Add to botton of file: `<username> ALL=(ALL) NOPASSWD: /usr/sbin/usbip`
+    - Add to bottom of file: `<username> ALL=(ALL) NOPASSWD: /usr/sbin/usbip`
 - I recommend testing pipewire and usbip connections from the terminal to ensure your set up is working.
 - Download and run the executabe inside the dist folder.
 - Add host ip, username, and password.
