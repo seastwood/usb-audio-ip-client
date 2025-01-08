@@ -9,7 +9,7 @@ from PyQt6.QtGui import QAction
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QPushButton,
                              QListWidget, QMenu, QWidget, QLabel,
                              QComboBox, QHBoxLayout, QListWidgetItem, QMessageBox, QSpacerItem, QSizePolicy, QTabWidget,
-                             QFrame)
+                             QFrame, QScrollArea)
 from cryptography.fernet import Fernet
 
 os.environ["PATH"] = "/usr/sbin:" + os.environ["PATH"]
@@ -47,129 +47,23 @@ class HostSinkConfigurationDialog(QDialog):
 
         main_layout = QVBoxLayout(self)
 
-        # Titles
-        client_title = QLabel("Client Source Settings")
-        client_title.setStyleSheet("font-weight: bold;")
-        host_title = QLabel("Host Sink Settings")
-        host_title.setStyleSheet("font-weight: bold;")
+        # Create Tab Widget
+        tab_widget = QTabWidget()
 
-        # Left column for Client Source Settings
-        client_source_layout = QFormLayout()
-        self.source_ip_client_field = QLineEdit("0.0.0.0")
-        client_source_layout.addRow("Source IP:", self.source_ip_client_field)
+        # Receive Tab
+        receive_tab_widget = QWidget()
+        receive_tab_layout = self.create_receive_tab()
+        receive_tab_widget.setLayout(receive_tab_layout)
+        tab_widget.addTab(receive_tab_widget, "Receiver")
 
-        self.source_port_client_field = QSpinBox()
-        self.source_port_client_field.setRange(1, 65535)
-        self.source_port_client_field.setValue(46000)
-        client_source_layout.addRow("Source Port:", self.source_port_client_field)
+        # Send Tab (Placeholder for now)
+        send_tab_widget = QWidget()
+        send_tab_layout = self.create_send_tab()
+        send_tab_widget.setLayout(send_tab_layout)
+        tab_widget.addTab(send_tab_widget, "Sender")
 
-        self.latency_field = QSpinBox()
-        self.latency_field.setRange(1, 1000)
-        self.latency_field.setValue(24)
-        client_source_layout.addRow("Client Latency (ms):", self.latency_field)
-
-        self.always_process_field = QCheckBox("Always Process")
-        self.always_process_field.setChecked(True)
-        client_source_layout.addRow("Always Process:", self.always_process_field)
-
-        self.client_session_name_field = QLineEdit("rtp-source")
-        client_source_layout.addRow("Session Name:", self.client_session_name_field)
-
-        self.client_audio_format_field = QLineEdit("S16BE")
-        client_source_layout.addRow("Audio Format:", self.client_audio_format_field)
-
-        self.client_audio_rate_field = QSpinBox()
-        self.client_audio_rate_field.setRange(8000, 96000)
-        self.client_audio_rate_field.setValue(8000)
-        client_source_layout.addRow("Audio Rate:", self.client_audio_rate_field)
-
-        self.client_audio_channels_field = QSpinBox()
-        self.client_audio_channels_field.setRange(1, 8)
-        self.client_audio_channels_field.setValue(1)
-        client_source_layout.addRow("Audio Channels:", self.client_audio_channels_field)
-
-        self.client_node_name_field = QLineEdit("rtp-source")
-        client_source_layout.addRow("Node Name:", self.client_node_name_field)
-
-        self.client_node_description_field = QLineEdit("RTP-source")
-        client_source_layout.addRow("Node Description:", self.client_node_description_field)
-
-        # Right column for Host Sink Settings
-        host_sink_layout = QFormLayout()
-        self.source_ip_field = QLineEdit("0.0.0.0")
-        host_sink_layout.addRow("Source IP:", self.source_ip_field)
-
-        self.destination_ip_field = QLineEdit("192.168.1.214")
-        host_sink_layout.addRow("Destination IP:", self.destination_ip_field)
-
-        self.destination_port_field = QSpinBox()
-        self.destination_port_field.setRange(1, 65535)
-        self.destination_port_field.setValue(46000)
-        host_sink_layout.addRow("Destination Port:", self.destination_port_field)
-
-        self.mtu_field = QSpinBox()
-        self.mtu_field.setRange(128, 1500)
-        self.mtu_field.setValue(256)
-        host_sink_layout.addRow("MTU:", self.mtu_field)
-
-        self.ttl_field = QSpinBox()
-        self.ttl_field.setRange(1, 255)
-        self.ttl_field.setValue(1)
-        host_sink_layout.addRow("TTL:", self.ttl_field)
-
-        self.loop_field = QCheckBox("Loop")
-        self.loop_field.setChecked(True)
-        host_sink_layout.addRow("Net Loop:", self.loop_field)
-
-        self.min_ptime_field = QSpinBox()
-        self.min_ptime_field.setRange(1, 10)
-        self.min_ptime_field.setValue(2)
-        host_sink_layout.addRow("Min P-Time:", self.min_ptime_field)
-
-        self.max_ptime_field = QSpinBox()
-        self.max_ptime_field.setRange(1, 10)
-        self.max_ptime_field.setValue(10)
-        host_sink_layout.addRow("Max P-Time:", self.max_ptime_field)
-
-        self.session_name_field = QLineEdit("rtp-sink")
-        host_sink_layout.addRow("Session Name:", self.session_name_field)
-
-        self.audio_format_field = QLineEdit("S16BE")
-        host_sink_layout.addRow("Audio Format:", self.audio_format_field)
-
-        self.audio_rate_field = QSpinBox()
-        self.audio_rate_field.setRange(8000, 96000)
-        self.audio_rate_field.setValue(8000)
-        host_sink_layout.addRow("Audio Rate:", self.audio_rate_field)
-
-        self.audio_channels_field = QSpinBox()
-        self.audio_channels_field.setRange(1, 8)
-        self.audio_channels_field.setValue(1)
-        host_sink_layout.addRow("Audio Channels:", self.audio_channels_field)
-
-        self.node_name_field = QLineEdit("rtp-sink")
-        host_sink_layout.addRow("Node Name:", self.node_name_field)
-
-        self.node_description_field = QLineEdit("RTP-sink")
-        host_sink_layout.addRow("Node Description:", self.node_description_field)
-
-        # Combine the two columns
-        columns_layout = QHBoxLayout()
-        left_column = QVBoxLayout()
-        left_column.addWidget(client_title)
-        left_column.addLayout(client_source_layout)
-        left_column.setAlignment(Qt.AlignmentFlag.AlignTop)
-
-        right_column = QVBoxLayout()
-        right_column.addWidget(host_title)
-        right_column.addLayout(host_sink_layout)
-        right_column.setAlignment(Qt.AlignmentFlag.AlignTop)
-
-        columns_layout.addLayout(left_column)
-        columns_layout.addSpacerItem(QSpacerItem(20, 0, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
-        columns_layout.addLayout(right_column)
-
-        main_layout.addLayout(columns_layout)
+        # Add tabs to the main layout
+        main_layout.addWidget(tab_widget)
 
         # Buttons
         self.buttons = QDialogButtonBox(
@@ -191,40 +85,330 @@ class HostSinkConfigurationDialog(QDialog):
         # Load existing settings
         self.load_settings()
 
+    def create_receive_tab(self):
+        """Creates the UI for the Receive tab."""
+        tab_layout = QVBoxLayout()
+
+        # Titles
+        client_title = QLabel("Client Source Settings")
+        client_title.setStyleSheet("font-weight: bold;")
+        host_title = QLabel("Host Sink Settings")
+        host_title.setStyleSheet("font-weight: bold;")
+
+        # Left column for Client Source Settings
+        client_source_layout = QFormLayout()
+        self.client_source_source_ip_client_field = QLineEdit("0.0.0.0")
+        client_source_layout.addRow("Source IP:", self.client_source_source_ip_client_field)
+
+        self.client_source_source_port_client_field = QSpinBox()
+        self.client_source_source_port_client_field.setRange(1, 65535)
+        self.client_source_source_port_client_field.setValue(46000)
+        client_source_layout.addRow("Source Port:", self.client_source_source_port_client_field)
+
+        self.client_source_latency_field = QSpinBox()
+        self.client_source_latency_field.setRange(1, 1000)
+        self.client_source_latency_field.setValue(24)
+        client_source_layout.addRow("Client Latency (ms):", self.client_source_latency_field)
+
+        self.client_source_always_process_field = QCheckBox("Always Process")
+        self.client_source_always_process_field.setChecked(True)
+        client_source_layout.addRow("Always Process:", self.client_source_always_process_field)
+
+        self.client_source_session_name_field = QLineEdit("RTP-source-receiver")
+        client_source_layout.addRow("Session Name:", self.client_source_session_name_field)
+
+        self.client_source_audio_format_field = QLineEdit("S16BE")
+        client_source_layout.addRow("Audio Format:", self.client_source_audio_format_field)
+
+        self.client_source_audio_rate_field = QSpinBox()
+        self.client_source_audio_rate_field.setRange(8000, 96000)
+        self.client_source_audio_rate_field.setValue(16000)
+        client_source_layout.addRow("Audio Rate:", self.client_source_audio_rate_field)
+
+        self.client_source_audio_channels_field = QSpinBox()
+        self.client_source_audio_channels_field.setRange(1, 8)
+        self.client_source_audio_channels_field.setValue(1)
+        client_source_layout.addRow("Audio Channels:", self.client_source_audio_channels_field)
+
+        self.client_source_node_name_field = QLineEdit("RTP-source-receiver")
+        client_source_layout.addRow("Node Name:", self.client_source_node_name_field)
+
+        self.client_source_node_description_field = QLineEdit("RTP-source-receiver")
+        client_source_layout.addRow("Node Description:", self.client_source_node_description_field)
+
+        # Right column for Host Sink Settings
+        host_sink_layout = QFormLayout()
+        self.host_sink_source_ip_field = QLineEdit("0.0.0.0")
+        host_sink_layout.addRow("Source IP:", self.host_sink_source_ip_field)
+
+        self.host_sink_destination_ip_field = QLineEdit("192.168.1.214")
+        host_sink_layout.addRow("Destination IP:", self.host_sink_destination_ip_field)
+
+        self.host_sink_destination_port_field = QSpinBox()
+        self.host_sink_destination_port_field.setRange(1, 65535)
+        self.host_sink_destination_port_field.setValue(46000)
+        host_sink_layout.addRow("Destination Port:", self.host_sink_destination_port_field)
+
+        self.host_sink_mtu_field = QSpinBox()
+        self.host_sink_mtu_field.setRange(128, 1500)
+        self.host_sink_mtu_field.setValue(256)
+        host_sink_layout.addRow("MTU:", self.host_sink_mtu_field)
+
+        self.host_sink_ttl_field = QSpinBox()
+        self.host_sink_ttl_field.setRange(1, 255)
+        self.host_sink_ttl_field.setValue(1)
+        host_sink_layout.addRow("TTL:", self.host_sink_ttl_field)
+
+        self.host_sink_loop_field = QCheckBox("Loop")
+        self.host_sink_loop_field.setChecked(True)
+        host_sink_layout.addRow("Net Loop:", self.host_sink_loop_field)
+
+        self.host_sink_min_ptime_field = QSpinBox()
+        self.host_sink_min_ptime_field.setRange(1, 10)
+        self.host_sink_min_ptime_field.setValue(2)
+        host_sink_layout.addRow("Min P-Time:", self.host_sink_min_ptime_field)
+
+        self.host_sink_max_ptime_field = QSpinBox()
+        self.host_sink_max_ptime_field.setRange(1, 10)
+        self.host_sink_max_ptime_field.setValue(10)
+        host_sink_layout.addRow("Max P-Time:", self.host_sink_max_ptime_field)
+
+        self.host_sink_session_name_field = QLineEdit("RTP-sink-sender")
+        host_sink_layout.addRow("Session Name:", self.host_sink_session_name_field)
+
+        self.host_sink_audio_format_field = QLineEdit("S16BE")
+        host_sink_layout.addRow("Audio Format:", self.host_sink_audio_format_field)
+
+        self.host_sink_audio_rate_field = QSpinBox()
+        self.host_sink_audio_rate_field.setRange(8000, 96000)
+        self.host_sink_audio_rate_field.setValue(16000)
+        host_sink_layout.addRow("Audio Rate:", self.host_sink_audio_rate_field)
+
+        self.host_sink_audio_channels_field = QSpinBox()
+        self.host_sink_audio_channels_field.setRange(1, 8)
+        self.host_sink_audio_channels_field.setValue(1)
+        host_sink_layout.addRow("Audio Channels:", self.host_sink_audio_channels_field)
+
+        self.host_sink_node_name_field = QLineEdit("RTP-sink-sender")
+        host_sink_layout.addRow("Node Name:", self.host_sink_node_name_field)
+
+        self.host_sink_node_description_field = QLineEdit("RTP-sink-sender")
+        host_sink_layout.addRow("Node Description:", self.host_sink_node_description_field)
+
+        # Combine the two columns
+        columns_layout = QHBoxLayout()
+        left_column = QVBoxLayout()
+        left_column.addWidget(client_title)
+        left_column.addLayout(client_source_layout)
+        left_column.setAlignment(Qt.AlignmentFlag.AlignTop)
+
+        right_column = QVBoxLayout()
+        right_column.addWidget(host_title)
+        right_column.addLayout(host_sink_layout)
+        right_column.setAlignment(Qt.AlignmentFlag.AlignTop)
+
+        columns_layout.addLayout(left_column)
+        columns_layout.addSpacerItem(QSpacerItem(20, 0, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
+        columns_layout.addLayout(right_column)
+
+        tab_layout.addLayout(columns_layout)
+        return tab_layout
+
+    def create_send_tab(self):
+        """Creates the UI for the Send tab."""
+        tab_layout = QVBoxLayout()
+
+        # Titles
+        client_title = QLabel("Client Sink Settings")
+        client_title.setStyleSheet("font-weight: bold;")
+        host_title = QLabel("Host Source Settings")
+        host_title.setStyleSheet("font-weight: bold;")
+
+        # Left column for Client Sink Settings
+        client_sink_layout = QFormLayout()
+        self.client_sink_source_ip_field = QLineEdit("0.0.0.0")
+        client_sink_layout.addRow("Source IP:", self.client_sink_source_ip_field)
+
+        self.client_sink_destination_ip_field = QLineEdit("192.168.1.214")
+        client_sink_layout.addRow("Destination IP:", self.client_sink_destination_ip_field)
+
+        self.client_sink_destination_port_field = QSpinBox()
+        self.client_sink_destination_port_field.setRange(1, 65535)
+        self.client_sink_destination_port_field.setValue(46000)
+        client_sink_layout.addRow("Destination Port:", self.client_sink_destination_port_field)
+
+        self.client_sink_mtu_field = QSpinBox()
+        self.client_sink_mtu_field.setRange(128, 1500)
+        self.client_sink_mtu_field.setValue(256)
+        client_sink_layout.addRow("MTU:", self.client_sink_mtu_field)
+
+        self.client_sink_ttl_field = QSpinBox()
+        self.client_sink_ttl_field.setRange(1, 255)
+        self.client_sink_ttl_field.setValue(1)
+        client_sink_layout.addRow("TTL:", self.client_sink_ttl_field)
+
+        self.client_sink_loop_field = QCheckBox("Loop")
+        self.client_sink_loop_field.setChecked(True)
+        client_sink_layout.addRow("Net Loop:", self.client_sink_loop_field)
+
+        self.client_sink_min_ptime_field = QSpinBox()
+        self.client_sink_min_ptime_field.setRange(1, 10)
+        self.client_sink_min_ptime_field.setValue(2)
+        client_sink_layout.addRow("Min P-Time:", self.client_sink_min_ptime_field)
+
+        self.client_sink_max_ptime_field = QSpinBox()
+        self.client_sink_max_ptime_field.setRange(1, 10)
+        self.client_sink_max_ptime_field.setValue(10)
+        client_sink_layout.addRow("Max P-Time:", self.client_sink_max_ptime_field)
+
+        self.client_sink_session_name_field = QLineEdit("RTP-sink-sender")
+        client_sink_layout.addRow("Session Name:", self.client_sink_session_name_field)
+
+        self.client_sink_audio_format_field = QLineEdit("S16BE")
+        client_sink_layout.addRow("Audio Format:", self.client_sink_audio_format_field)
+
+        self.client_sink_audio_rate_field = QSpinBox()
+        self.client_sink_audio_rate_field.setRange(8000, 96000)
+        self.client_sink_audio_rate_field.setValue(16000)
+        client_sink_layout.addRow("Audio Rate:", self.client_sink_audio_rate_field)
+
+        self.client_sink_audio_channels_field = QSpinBox()
+        self.client_sink_audio_channels_field.setRange(1, 8)
+        self.client_sink_audio_channels_field.setValue(1)
+        client_sink_layout.addRow("Audio Channels:", self.client_sink_audio_channels_field)
+
+        self.client_sink_node_name_field = QLineEdit("RTP-sink-sender")
+        client_sink_layout.addRow("Node Name:", self.client_sink_node_name_field)
+
+        self.client_sink_node_description_field = QLineEdit("RTP-sink-sender")
+        client_sink_layout.addRow("Node Description:", self.client_sink_node_description_field)
+
+        # Right column for Host Source Settings
+        host_source_layout = QFormLayout()
+        self.host_source_source_ip_field = QLineEdit("0.0.0.0")
+        host_source_layout.addRow("Source IP:", self.host_source_source_ip_field)
+
+        self.host_source_source_port_field = QSpinBox()
+        self.host_source_source_port_field.setRange(1, 65535)
+        self.host_source_source_port_field.setValue(46000)
+        host_source_layout.addRow("Source Port:", self.host_source_source_port_field)
+
+        self.host_source_latency_field = QSpinBox()
+        self.host_source_latency_field.setRange(1, 1000)
+        self.host_source_latency_field.setValue(24)
+        host_source_layout.addRow("Client Latency (ms):", self.host_source_latency_field)
+
+        self.host_source_always_process_field = QCheckBox("Always Process")
+        self.host_source_always_process_field.setChecked(True)
+        host_source_layout.addRow("Always Process:", self.host_source_always_process_field)
+
+        self.host_source_session_name_field = QLineEdit("RTP-source-receiver")
+        host_source_layout.addRow("Session Name:", self.host_source_session_name_field)
+
+        self.host_source_audio_format_field = QLineEdit("S16BE")
+        host_source_layout.addRow("Audio Format:", self.host_source_audio_format_field)
+
+        self.host_source_audio_rate_field = QSpinBox()
+        self.host_source_audio_rate_field.setRange(8000, 96000)
+        self.host_source_audio_rate_field.setValue(16000)
+        host_source_layout.addRow("Audio Rate:", self.host_source_audio_rate_field)
+
+        self.host_source_audio_channels_field = QSpinBox()
+        self.host_source_audio_channels_field.setRange(1, 8)
+        self.host_source_audio_channels_field.setValue(1)
+        host_source_layout.addRow("Audio Channels:", self.host_source_audio_channels_field)
+
+        self.host_source_node_name_field = QLineEdit("RTP-source-receiver")
+        host_source_layout.addRow("Node Name:", self.host_source_node_name_field)
+
+        self.host_source_node_description_field = QLineEdit("RTP-source-receiver")
+        host_source_layout.addRow("Node Description:", self.host_source_node_description_field)
+
+        # Combine the two columns
+        columns_layout = QHBoxLayout()
+        left_column = QVBoxLayout()
+        left_column.addWidget(client_title)
+        left_column.addLayout(client_sink_layout)
+        left_column.setAlignment(Qt.AlignmentFlag.AlignTop)
+
+        right_column = QVBoxLayout()
+        right_column.addWidget(host_title)
+        right_column.addLayout(host_source_layout)
+        right_column.setAlignment(Qt.AlignmentFlag.AlignTop)
+
+        columns_layout.addLayout(left_column)
+        columns_layout.addSpacerItem(QSpacerItem(20, 0, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
+        columns_layout.addLayout(right_column)
+
+        tab_layout.addLayout(columns_layout)
+        return tab_layout
+
     def load_settings(self):
         """Load settings from JSON files and populate the fields."""
         try:
             with open("host_sink_config.json", "r", encoding="utf-8") as host_sink_file:
                 host_sink_settings = json.load(host_sink_file)
 
-                self.source_ip_field.setText(host_sink_settings.get("source_ip", "0.0.0.0"))
-                self.destination_ip_field.setText(host_sink_settings.get("destination_ip", ""))
-                self.destination_port_field.setValue(host_sink_settings.get("destination_port", 46000))
-                self.mtu_field.setValue(host_sink_settings.get("mtu", 256))
-                self.ttl_field.setValue(host_sink_settings.get("ttl", 1))
-                self.loop_field.setChecked(host_sink_settings.get("loop", True))
-                self.min_ptime_field.setValue(host_sink_settings.get("min_ptime", 2))
-                self.max_ptime_field.setValue(host_sink_settings.get("max_ptime", 10))
-                self.session_name_field.setText(host_sink_settings.get("session_name", ""))
-                self.audio_format_field.setText(host_sink_settings.get("audio_format", ""))
-                self.audio_rate_field.setValue(host_sink_settings.get("audio_rate", 8000))
-                self.audio_channels_field.setValue(host_sink_settings.get("audio_channels", 1))
-                self.node_name_field.setText(host_sink_settings.get("node_name", ""))
-                self.node_description_field.setText(host_sink_settings.get("node_description", ""))
+                self.host_sink_source_ip_field.setText(host_sink_settings.get("source_ip", "0.0.0.0"))
+                self.host_sink_destination_ip_field.setText(host_sink_settings.get("destination_ip", ""))
+                self.host_sink_destination_port_field.setValue(host_sink_settings.get("destination_port", 46000))
+                self.host_sink_mtu_field.setValue(host_sink_settings.get("mtu", 256))
+                self.host_sink_ttl_field.setValue(host_sink_settings.get("ttl", 1))
+                self.host_sink_loop_field.setChecked(host_sink_settings.get("loop", True))
+                self.host_sink_min_ptime_field.setValue(host_sink_settings.get("min_ptime", 2))
+                self.host_sink_max_ptime_field.setValue(host_sink_settings.get("max_ptime", 10))
+                self.host_sink_session_name_field.setText(host_sink_settings.get("session_name", ""))
+                self.host_sink_audio_format_field.setText(host_sink_settings.get("audio_format", ""))
+                self.host_sink_audio_rate_field.setValue(host_sink_settings.get("audio_rate", 16000))
+                self.host_sink_audio_channels_field.setValue(host_sink_settings.get("audio_channels", 1))
+                self.host_sink_node_name_field.setText(host_sink_settings.get("node_name", ""))
+                self.host_sink_node_description_field.setText(host_sink_settings.get("node_description", ""))
 
             with open("client_source_config.json", "r", encoding="utf-8") as client_source_file:
                 client_source_settings = json.load(client_source_file)
 
-                self.source_ip_client_field.setText(client_source_settings.get("source_ip", ""))
-                self.source_port_client_field.setValue(client_source_settings.get("source_port", 46000))
-                self.latency_field.setValue(client_source_settings.get("latency", 24))
-                self.always_process_field.setChecked(client_source_settings.get("always_process", True))
-                self.client_session_name_field.setText(client_source_settings.get("session_name", ""))
-                self.client_audio_format_field.setText(client_source_settings.get("audio_format", ""))
-                self.client_audio_rate_field.setValue(client_source_settings.get("audio_rate", 8000))
-                self.client_audio_channels_field.setValue(client_source_settings.get("audio_channels", 1))
-                self.client_node_name_field.setText(client_source_settings.get("node_name", ""))
-                self.client_node_description_field.setText(client_source_settings.get("node_description", ""))
+                self.client_source_source_ip_client_field.setText(client_source_settings.get("source_ip", ""))
+                self.client_source_source_port_client_field.setValue(client_source_settings.get("source_port", 46000))
+                self.client_source_latency_field.setValue(client_source_settings.get("latency", 24))
+                self.client_source_always_process_field.setChecked(client_source_settings.get("always_process", True))
+                self.client_source_session_name_field.setText(client_source_settings.get("session_name", ""))
+                self.client_source_audio_format_field.setText(client_source_settings.get("audio_format", ""))
+                self.client_source_audio_rate_field.setValue(client_source_settings.get("audio_rate", 16000))
+                self.client_source_audio_channels_field.setValue(client_source_settings.get("audio_channels", 1))
+                self.client_source_node_name_field.setText(client_source_settings.get("node_name", ""))
+                self.client_source_node_description_field.setText(client_source_settings.get("node_description", ""))
+
+            with open("host_source_config.json", "r", encoding="utf-8") as host_source_file:
+                host_source_settings = json.load(host_source_file)
+
+                self.host_source_source_ip_field.setText(host_source_settings.get("source_ip", ""))
+                self.host_source_source_port_field.setValue(host_source_settings.get("source_port", 46000))
+                self.host_source_latency_field.setValue(host_source_settings.get("latency", 24))
+                self.host_source_always_process_field.setChecked(host_source_settings.get("always_process", True))
+                self.host_source_session_name_field.setText(host_source_settings.get("session_name", ""))
+                self.host_source_audio_format_field.setText(host_source_settings.get("audio_format", ""))
+                self.host_source_audio_rate_field.setValue(host_source_settings.get("audio_rate", 16000))
+                self.host_source_audio_channels_field.setValue(host_source_settings.get("audio_channels", 1))
+                self.host_source_node_name_field.setText(host_source_settings.get("node_name", ""))
+                self.host_source_node_description_field.setText(host_source_settings.get("node_description", ""))
+
+            with open("client_sink_config.json", "r", encoding="utf-8") as client_sink_file:
+                client_sink_settings = json.load(client_sink_file)
+
+                self.client_sink_source_ip_field.setText(client_sink_settings.get("source_ip", "0.0.0.0"))
+                self.client_sink_destination_ip_field.setText(client_sink_settings.get("destination_ip", ""))
+                self.client_sink_destination_port_field.setValue(client_sink_settings.get("destination_port", 46000))
+                self.client_sink_mtu_field.setValue(client_sink_settings.get("mtu", 256))
+                self.client_sink_ttl_field.setValue(client_sink_settings.get("ttl", 1))
+                self.client_sink_loop_field.setChecked(client_sink_settings.get("loop", True))
+                self.client_sink_min_ptime_field.setValue(client_sink_settings.get("min_ptime", 2))
+                self.client_sink_max_ptime_field.setValue(client_sink_settings.get("max_ptime", 10))
+                self.client_sink_session_name_field.setText(client_sink_settings.get("session_name", ""))
+                self.client_sink_audio_format_field.setText(client_sink_settings.get("audio_format", ""))
+                self.client_sink_audio_rate_field.setValue(client_sink_settings.get("audio_rate", 16000))
+                self.client_sink_audio_channels_field.setValue(client_sink_settings.get("audio_channels", 1))
+                self.client_sink_node_name_field.setText(client_sink_settings.get("node_name", ""))
+                self.client_sink_node_description_field.setText(client_sink_settings.get("node_description", ""))
 
         except FileNotFoundError:
             # print("Configuration files not found. Using default values.")
@@ -255,6 +439,10 @@ class HostSinkConfigurationDialog(QDialog):
     def enable_settings(self):
         self.push_host_pw_sink_settings()
         self.push_client_pw_source_settings()
+        self.push_host_pw_source_settings()
+        self.push_client_pw_sink_settings()
+        self.parent_client.restart_client_pipewire()
+        self.parent_client.restart_host_pipewire()
 
     def push_client_pw_source_settings(self):
         try:
@@ -269,7 +457,7 @@ class HostSinkConfigurationDialog(QDialog):
             always_process = "true" if client_source_config.get("always_process", True) else "false"
             session_name = client_source_config.get("session_name", "rtp-sink")
             audio_format = client_source_config.get("audio_format", "S16BE")
-            audio_rate = client_source_config.get("audio_rate", 8000)
+            audio_rate = client_source_config.get("audio_rate", 16000)
             audio_channels = client_source_config.get("audio_channels", 1)
             node_name = client_source_config.get("node_name", "rtp-sink")
             node_description = client_source_config.get("node_description", "RTP-sink")
@@ -289,7 +477,7 @@ class HostSinkConfigurationDialog(QDialog):
             audio.format = "{audio_format}"
             audio.rate = {audio_rate}
             audio.channels = {audio_channels}
-            audio.position = "[ FC ]"
+            audio.position = "FL,FR"
             stream.props = {{
                 media.class = "Audio/Source"
                 node.name = "{node_name}"
@@ -308,7 +496,82 @@ class HostSinkConfigurationDialog(QDialog):
                 config_file.write(file_content)
 
             # Restart PipeWire
-            subprocess.run(["systemctl", "--user", "restart", "pipewire.service"], check=True)
+            # subprocess.run(["systemctl", "--user", "restart", "pipewire.service"], check=True)
+
+        except FileNotFoundError:
+            # print("Configuration file not found: client_source_config.json")
+            self.parent_client.add_message("Configuration file not found: client_source_config.json")
+        except json.JSONDecodeError:
+            # print("Error parsing the JSON file.")
+            self.parent_client.add_message("Error parsing the JSON file.")
+        except subprocess.CalledProcessError as e:
+            # print(f"Error restarting PipeWire: {e}")
+            self.parent_client.add_message(f"Error restarting PipeWire: {e}")
+        except Exception as e:
+            # print(f"An unexpected error occurred: {e}")
+            self.parent_client.add_message(f"An unexpected error occurred: {e}")
+
+    def push_client_pw_sink_settings(self):
+        try:
+            # Load the host sink configuration from the JSON file
+            with open("client_sink_config.json", "r") as f:
+                client_sink_config = json.load(f)
+
+            # Extract the values from the JSON file
+            source_ip = client_sink_config.get("source_ip", "0.0.0.0")
+            destination_ip = client_sink_config.get("destination_ip", "192.168.1.214")
+            destination_port = client_sink_config.get("destination_port", 46000)
+            mtu = client_sink_config.get("mtu", 256)
+            ttl = client_sink_config.get("ttl", 1)
+            loop = "true" if client_sink_config.get("loop", True) else "false"
+            min_ptime = client_sink_config.get("min_ptime", 2)
+            max_ptime = client_sink_config.get("max_ptime", 10)
+            session_name = client_sink_config.get("session_name", "rtp-sink")
+            audio_format = client_sink_config.get("audio_format", "S16BE")
+            audio_rate = client_sink_config.get("audio_rate", 16000)
+            audio_channels = client_sink_config.get("audio_channels", 1)
+            node_name = client_sink_config.get("node_name", "rtp-sink")
+            node_description = client_sink_config.get("node_description", "RTP-sink")
+
+            # Define the content of the file
+            file_content = f"""
+                    context.modules = [
+                    {{
+                        name = libpipewire-module-rtp-sink
+                        args = {{
+                            source.ip = "{source_ip}"
+                            destination.ip = "{destination_ip}"
+                            destination.port = {destination_port}
+                            net.mtu = {mtu}
+                            net.ttl = {ttl}
+                            net.loop = {str(loop).lower()}
+                            sess.min-ptime = {min_ptime}
+                            sess.max-ptime = {max_ptime}
+                            sess.name = "{session_name}"
+                            sess.media = "audio"
+                            audio.format = "{audio_format}"
+                            audio.rate = {audio_rate}
+                            audio.channels = {audio_channels}
+                            audio.position = "FL,FR"
+                            stream.props = {{
+                                media.class = "Audio/Sink"
+                                node.name = "{node_name}"
+                                node.description = "{node_description}"
+                            }}
+                        }}
+                    }}
+                    ]
+                    """
+
+            # Write the content to the file
+            file_path = os.path.expanduser("~/.config/pipewire/pipewire.conf.d/usbip_pipewire_app_client_sink.conf")
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)  # Ensure directory exists
+
+            with open(file_path, "w") as config_file:
+                config_file.write(file_content)
+
+            # Restart PipeWire
+            # subprocess.run(["systemctl", "--user", "restart", "pipewire.service"], check=True)
 
         except FileNotFoundError:
             # print("Configuration file not found: client_source_config.json")
@@ -351,7 +614,7 @@ class HostSinkConfigurationDialog(QDialog):
         max_ptime = host_sink_config.get("max_ptime", 10)
         session_name = host_sink_config.get("session_name", "rtp-sink")
         audio_format = host_sink_config.get("audio_format", "S16BE")
-        audio_rate = host_sink_config.get("audio_rate", 8000)
+        audio_rate = host_sink_config.get("audio_rate", 16000)
         audio_channels = host_sink_config.get("audio_channels", 1)
         node_name = host_sink_config.get("node_name", "rtp-sink")
         node_description = host_sink_config.get("node_description", "RTP-sink")
@@ -375,7 +638,7 @@ class HostSinkConfigurationDialog(QDialog):
                         audio.format = "{audio_format}"
                         audio.rate = {audio_rate}
                         audio.channels = {audio_channels}
-                        audio.position = "[ FC ]"
+                        audio.position = "FL,FR"
                         stream.props = {{
                             media.class = "Audio/Sink"
                             node.name = "{node_name}"
@@ -387,7 +650,7 @@ class HostSinkConfigurationDialog(QDialog):
                 """
 
         # Write the content to the file
-        file_path = "~/.config/pipewire/pipewire.conf.d/usbip_pipewire_client.conf"
+        file_path = "~/.config/pipewire/pipewire.conf.d/usbip_pipewire_host_sink.conf"
         command = f"echo '{file_content}' > {file_path}"
 
         # Debugging output: print the constructed command
@@ -420,7 +683,99 @@ class HostSinkConfigurationDialog(QDialog):
 
         # Close the SSH connection
         # Execute the pw-cli command to load the RTP sink module on the remote host
-        stdin, stdout, stderr = ssh.exec_command("systemctl --user restart pipewire.service")
+        # stdin, stdout, stderr = ssh.exec_command("systemctl --user restart pipewire.service")
+        # # Read the output and error streams
+        # output = stdout.read().decode()
+        # error = stderr.read().decode()
+        #
+        # # Debugging output: print the command output and error (if any)
+        # if error:
+        #     # print(f"Error: {error}")
+        #     self.parent_client.add_message(f"Error: {error}")
+        # else:
+        #     # print(f"Output: {output}")
+        #     # print("Pipewire successfully restarted on remote host.")
+        #     self.parent_client.add_message(f"Output: {output}")
+        #     self.parent_client.add_message("Pipewire successfully restarted on remote host.")
+
+        ssh.close()
+
+        # Return the output for further inspection
+        return output
+
+    def push_host_pw_source_settings(self):
+        """Enable PipeWire RTP sink module on the selected host."""
+        # Fetch the selected host details (host_ip, user, password)
+        if self.selected_host:
+            host_ip = self.selected_host['host_ip']
+            user = self.selected_host['user']
+            password = self.selected_host['password']
+            # print(f"Selected host: {host_ip}, User: {user}")  # Debugging output
+        else:
+            print("No selected host available.")
+            self.parent_client.add_message("No selected host available.")
+            return
+
+        # Load the host sink configuration from the JSON file
+        with open("host_source_config.json", "r") as f:
+            host_source_config = json.load(f)
+
+            # Extract the values from the JSON file
+            source_ip = host_source_config.get("source_ip", "0.0.0.0")
+            source_port = host_source_config.get("source_port", 46000)
+            latency = host_source_config.get("latency", 256)
+            always_process = "true" if host_source_config.get("always_process", True) else "false"
+            session_name = host_source_config.get("session_name", "rtp-sink")
+            audio_format = host_source_config.get("audio_format", "S16BE")
+            audio_rate = host_source_config.get("audio_rate", 16000)
+            audio_channels = host_source_config.get("audio_channels", 1)
+            node_name = host_source_config.get("node_name", "rtp-sink")
+            node_description = host_source_config.get("node_description", "RTP-sink")
+
+            # Define the content of the file
+            file_content = f"""
+            context.modules = [
+            {{
+                name = libpipewire-module-rtp-source
+                args = {{
+                    source.ip = "{source_ip}"
+                    source.port = {source_port}
+                    sess.latency.msec = {latency}
+                    node.always-process = {always_process}
+                    sess.name = "{session_name}"
+                    sess.media = "audio"
+                    audio.format = "{audio_format}"
+                    audio.rate = {audio_rate}
+                    audio.channels = {audio_channels}
+                    audio.position = "FL,FR"
+                    stream.props = {{
+                        media.class = "Audio/Source"
+                        node.name = "{node_name}"
+                        node.description = "{node_description}"
+                    }}
+                }}
+            }}
+            ]
+            """
+
+        # Write the content to the file
+        file_path = "~/.config/pipewire/pipewire.conf.d/usbip_pipewire_host_source.conf"
+        command = f"echo '{file_content}' > {file_path}"
+
+        # Debugging output: print the constructed command
+        # print(f"Command to send over SSH: {command}")
+
+        # Establish SSH connection to the host
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+        # Debugging output: print SSH connection attempt
+        # print(f"Connecting to {host_ip} with username {user}...")
+        ssh.connect(host_ip, username=user, password=password)
+
+        # Execute the pw-cli command to load the RTP sink module on the remote host
+        stdin, stdout, stderr = ssh.exec_command(command)
+
         # Read the output and error streams
         output = stdout.read().decode()
         error = stderr.read().decode()
@@ -431,9 +786,26 @@ class HostSinkConfigurationDialog(QDialog):
             self.parent_client.add_message(f"Error: {error}")
         else:
             # print(f"Output: {output}")
-            # print("Pipewire successfully restarted on remote host.")
+            # print("RTP sink module enabled successfully on remote host.")
             self.parent_client.add_message(f"Output: {output}")
-            self.parent_client.add_message("Pipewire successfully restarted on remote host.")
+            self.parent_client.add_message("RTP source module enabled successfully on remote host.")
+
+        # Close the SSH connection
+        # # Execute the pw-cli command to load the RTP sink module on the remote host
+        # stdin, stdout, stderr = ssh.exec_command("systemctl --user restart pipewire.service")
+        # # Read the output and error streams
+        # output = stdout.read().decode()
+        # error = stderr.read().decode()
+        #
+        # # Debugging output: print the command output and error (if any)
+        # if error:
+        #     # print(f"Error: {error}")
+        #     self.parent_client.add_message(f"Error: {error}")
+        # else:
+        #     # print(f"Output: {output}")
+        #     # print("Pipewire successfully restarted on remote host.")
+        #     self.parent_client.add_message(f"Output: {output}")
+        #     self.parent_client.add_message("Pipewire successfully restarted on remote host.")
 
         ssh.close()
 
@@ -443,33 +815,64 @@ class HostSinkConfigurationDialog(QDialog):
     def save_settings(self):
         # Save the host sink settings
         host_sink_settings = {
-            "source_ip": self.source_ip_field.text(),
-            "destination_ip": self.destination_ip_field.text(),
-            "destination_port": self.destination_port_field.value(),
-            "mtu": self.mtu_field.value(),
-            "ttl": self.ttl_field.value(),
-            "loop": self.loop_field.isChecked(),
-            "min_ptime": self.min_ptime_field.value(),
-            "max_ptime": self.max_ptime_field.value(),
-            "session_name": self.session_name_field.text(),
-            "audio_format": self.audio_format_field.text(),
-            "audio_rate": self.audio_rate_field.value(),
-            "audio_channels": self.audio_channels_field.value(),
-            "node_name": self.node_name_field.text(),
-            "node_description": self.node_description_field.text()
+            "source_ip": self.host_sink_source_ip_field.text(),
+            "destination_ip": self.host_sink_destination_ip_field.text(),
+            "destination_port": self.host_sink_destination_port_field.value(),
+            "mtu": self.host_sink_mtu_field.value(),
+            "ttl": self.host_sink_ttl_field.value(),
+            "loop": self.host_sink_loop_field.isChecked(),
+            "min_ptime": self.host_sink_min_ptime_field.value(),
+            "max_ptime": self.host_sink_max_ptime_field.value(),
+            "session_name": self.host_sink_session_name_field.text(),
+            "audio_format": self.host_sink_audio_format_field.text(),
+            "audio_rate": self.host_sink_audio_rate_field.value(),
+            "audio_channels": self.host_sink_audio_channels_field.value(),
+            "node_name": self.host_sink_node_name_field.text(),
+            "node_description": self.host_sink_node_description_field.text()
         }
 
         client_source_settings = {
-            "source_ip": self.source_ip_client_field.text(),
-            "source_port": self.source_port_client_field.value(),
-            "latency": self.latency_field.value(),
-            "always_process": self.always_process_field.isChecked(),
-            "session_name": self.client_session_name_field.text(),
-            "audio_format": self.client_audio_format_field.text(),
-            "audio_rate": self.client_audio_rate_field.value(),
-            "audio_channels": self.client_audio_channels_field.value(),
-            "node_name": self.client_node_name_field.text(),
-            "node_description": self.client_node_description_field.text()
+            "source_ip": self.client_source_source_ip_client_field.text(),
+            "source_port": self.client_source_source_port_client_field.value(),
+            "latency": self.client_source_latency_field.value(),
+            "always_process": self.client_source_always_process_field.isChecked(),
+            "session_name": self.client_source_session_name_field.text(),
+            "audio_format": self.client_source_audio_format_field.text(),
+            "audio_rate": self.client_source_audio_rate_field.value(),
+            "audio_channels": self.client_source_audio_channels_field.value(),
+            "node_name": self.client_source_node_name_field.text(),
+            "node_description": self.client_source_node_description_field.text()
+        }
+
+        host_source_settings = {
+            "source_ip": self.host_source_source_ip_field.text(),
+            "source_port": self.host_source_source_port_field.value(),
+            "latency": self.host_source_latency_field.value(),
+            "always_process": self.host_source_always_process_field.isChecked(),
+            "session_name": self.host_source_session_name_field.text(),
+            "audio_format": self.host_source_audio_format_field.text(),
+            "audio_rate": self.host_source_audio_rate_field.value(),
+            "audio_channels": self.host_source_audio_channels_field.value(),
+            "node_name": self.host_source_node_name_field.text(),
+            "node_description": self.host_source_node_description_field.text()
+
+        }
+
+        client_sink_settings = {
+            "source_ip": self.client_sink_source_ip_field.text(),
+            "destination_ip": self.client_sink_destination_ip_field.text(),
+            "destination_port": self.client_sink_destination_port_field.value(),
+            "mtu": self.client_sink_mtu_field.value(),
+            "ttl": self.client_sink_ttl_field.value(),
+            "loop": self.client_sink_loop_field.isChecked(),
+            "min_ptime": self.client_sink_min_ptime_field.value(),
+            "max_ptime": self.client_sink_max_ptime_field.value(),
+            "session_name": self.client_sink_session_name_field.text(),
+            "audio_format": self.client_sink_audio_format_field.text(),
+            "audio_rate": self.client_sink_audio_rate_field.value(),
+            "audio_channels": self.client_sink_audio_channels_field.value(),
+            "node_name": self.client_sink_node_name_field.text(),
+            "node_description": self.client_sink_node_description_field.text()
         }
 
         try:
@@ -482,13 +885,23 @@ class HostSinkConfigurationDialog(QDialog):
                 client_source_file.write(json.dumps(client_source_settings, indent=4))
             # print("Client source settings saved to client_source_config.json")
             self.parent_client.add_message("Client source settings saved to client_source_config.json")
+
+            # Use json.dumps to create the JSON string
+            with open("host_source_config.json", "w", encoding="utf-8") as host_source_file:
+                host_source_file.write(json.dumps(host_source_settings, indent=4))
+            # print("Host source settings saved to host_sink_config.json")
+            self.parent_client.add_message("Host source settings saved to host_sink_config.json")
+            with open("client_sink_config.json", "w", encoding="utf-8") as client_sink_file:
+                client_sink_file.write(json.dumps(client_sink_settings, indent=4))
+            # print("Client sink settings saved to client_source_config.json")
+            self.parent_client.add_message("Client sink settings saved to client_source_config.json")
         except Exception as e:
             # print(f"Failed to save settings: {e}")
             self.parent_client.add_message(f"Failed to save settings: {e}")
 
     def test_connection(self):
         """Test if the PipeWire node with the specified name exists on the host."""
-        client_node_name = self.client_node_name_field.text().strip()
+        client_node_name = self.client_source_node_name_field.text().strip()
 
         if not client_node_name:
             QMessageBox.warning(self, "Test Connection", "Host node name is empty!")
@@ -803,23 +1216,53 @@ class USBIPClient(QMainWindow):
         # Add the audio button layout to the pipewire tab layout
         self.pipewire_tab_layout.addLayout(audio_button_layout)
 
-        # Section Title for Pipewire Audio Streaming
-        self.pipewire_title = QLabel("Host Audio Devices")
-        self.pipewire_title.setStyleSheet("font-size: 16px; font-weight: bold;")  # Styling for the title
-        self.pipewire_tab_layout.addWidget(self.pipewire_title)
+        # Create tab widget
+        self.tab_widget = QTabWidget()
+        self.pipewire_tab_layout.addWidget(self.tab_widget)
 
-        # Section to display the audio devices
-        self.audio_devices_list = QListWidget()
-        self.pipewire_tab_layout.addWidget(self.audio_devices_list)
+        # Host Devices Tab
+        self.host_tab = QWidget()
+        host_layout = QVBoxLayout(self.host_tab)
 
-        # Section Title for Pipewire Audio Streaming
-        self.pipewire_title = QLabel("Host Linked Audio Devices")
-        self.pipewire_title.setStyleSheet("font-size: 16px; font-weight: bold;")  # Styling for the title
-        self.pipewire_tab_layout.addWidget(self.pipewire_title)
+        # Host Audio Devices
+        host_devices_label = QLabel("Host Audio Devices")
+        host_devices_label.setStyleSheet("font-size: 16px; font-weight: bold;")
+        host_layout.addWidget(host_devices_label)
 
-        # Section to display the linked devices
-        self.linked_devices_list = QListWidget()  # Add this list for linked devices
-        self.pipewire_tab_layout.addWidget(self.linked_devices_list)  # Add it to the layout
+        self.host_audio_devices_list = QListWidget()
+        host_layout.addWidget(self.host_audio_devices_list)
+
+        # Host Linked Audio Devices
+        host_linked_label = QLabel("Host Linked Audio Devices")
+        host_linked_label.setStyleSheet("font-size: 16px; font-weight: bold;")
+        host_layout.addWidget(host_linked_label)
+
+        self.host_linked_devices_list = QScrollArea()
+        host_layout.addWidget(self.host_linked_devices_list)
+
+        self.tab_widget.addTab(self.host_tab, "Host Devices")
+
+        # Client Devices Tab
+        self.client_tab = QWidget()
+        client_layout = QVBoxLayout(self.client_tab)
+
+        # Client Audio Devices
+        client_devices_label = QLabel("Client Audio Devices")
+        client_devices_label.setStyleSheet("font-size: 16px; font-weight: bold;")
+        client_layout.addWidget(client_devices_label)
+
+        self.client_audio_devices_list = QListWidget()
+        client_layout.addWidget(self.client_audio_devices_list)
+
+        # Client Linked Audio Devices
+        client_linked_label = QLabel("Client Linked Audio Devices")
+        client_linked_label.setStyleSheet("font-size: 16px; font-weight: bold;")
+        client_layout.addWidget(client_linked_label)
+
+        self.client_linked_devices_list = QScrollArea()
+        client_layout.addWidget(self.client_linked_devices_list)
+
+        self.tab_widget.addTab(self.client_tab, "Client Devices")
 
         # Add Pipewire tab to the tab widget
         self.tabs.addTab(self.pipewire_tab, "Pipewire Streams")
@@ -919,7 +1362,7 @@ class USBIPClient(QMainWindow):
 
                 # Refresh the device list after restarting the USBIP service
                 # self.refresh_audio_devices()
-                self.refresh_linked_devices()
+                self.refresh_host_linked_devices()
 
         except paramiko.SSHException as e:
             self.add_message(f"SSH connection error: {e}")
@@ -1151,14 +1594,6 @@ class USBIPClient(QMainWindow):
 
         except Exception as e:
             self.add_message(f"An error occurred: {str(e)}")
-
-    # def display_error_message(self, message):
-    #     """Display an error message in the QListWidget."""
-    #     error_message = QLabel(message)
-    #     error_item = QListWidgetItem(self.device_list)  # Create a QListWidgetItem for the error message
-    #     error_item.setSizeHint(error_message.sizeHint())  # Set size hint for the item
-    #     self.device_list.addItem(error_item)  # Add the item to the list
-    #     self.device_list.setItemWidget(error_item, error_message)  # Set the QLabel as the widget for the item
 
     def force_connect_device(self, item):
         device_widget = self.device_list.itemWidget(item)  # Get the widget to access the Device object
@@ -1399,74 +1834,108 @@ class USBIPClient(QMainWindow):
         for host in self.hosts:
             self.host_dropdown.addItem(host['host_ip'])
 
+    def parse_audio_devices(self, pw_cli_output):
+        """Parse and filter audio devices from the pw-cli output."""
+        audio_devices = []
+
+        # Split the output into blocks of each device info
+        device_blocks = pw_cli_output.split('id ')
+
+        for block in device_blocks:
+            # Check if the block contains "Audio" in node.description
+            if "node.description = " in block and "Audio" in block:
+                # Extract the node.name
+                match = re.search(r'node.name = "(.*?)"', block)
+                if match:
+                    audio_device = match.group(1)
+                    audio_devices.append(audio_device)
+
+        return audio_devices
+
     def refresh_audio_devices(self):
         """Fetch and display available audio devices."""
         if self.selected_host:
-            # Get the list of audio devices from the host
-            pw_cli_output = self.fetch_audio_devices(
-                self.selected_host['host_ip'],
-                self.selected_host['user'],
-                self.selected_host['password']
-            )
-
-            # Parse and filter the audio devices
-            audio_devices = self.parse_audio_devices(pw_cli_output)
-
-            # Clear the existing list
-            self.audio_devices_list.clear()
-
-            # Add each audio device to the list widget with a link button to the left
-            for device in audio_devices:
-                # Create an empty list item
-                item = QListWidgetItem()
-
-                # Create a QWidget to contain the button and device name
-                widget = QWidget()
-                layout = QHBoxLayout()  # Horizontal layout for button and label
-
-                # Create the link button with a fixed size
-                link_button = QPushButton("Link")
-                link_button.setFixedWidth(80)  # Set a fixed width for the buttons
-                # Connect the button click event to show the device link menu
-                link_button.clicked.connect(
-                    lambda checked, device=device, button=link_button: self.show_device_link_menu(device, audio_devices,
-                                                                                                  button))
-
-                # Create the label for the device name
-                device_label = QLabel(device)
-
-                # Add the button and label to the layout
-                layout.addWidget(link_button)  # Button first (left side)
-                layout.addWidget(device_label)  # Label next (right side)
-
-                # Set the layout to the QWidget
-                widget.setLayout(layout)
-
-                # Attach the QWidget to the QListWidgetItem
-                item.setSizeHint(widget.sizeHint())  # Make sure the widget size fits the item
-                self.audio_devices_list.addItem(item)
-                self.audio_devices_list.setItemWidget(item, widget)
+            self.refresh_host_audio_devices()
+            self.refresh_client_audio_devices()
 
             # Fetch linked devices and update the UI
-            self.refresh_linked_devices()
+            self.refresh_host_linked_devices()
+            self.refresh_client_linked_devices()
 
-    def refresh_linked_devices(self):
+    def refresh_host_audio_devices(self):
+        # Get the list of audio devices from the host
+        pw_cli_output = self.fetch_host_audio_devices(
+            self.selected_host['host_ip'],
+            self.selected_host['user'],
+            self.selected_host['password']
+        )
+
+        # Parse and filter the audio devices
+        audio_devices = self.parse_audio_devices(pw_cli_output)
+
+        # Clear the existing list
+        self.host_audio_devices_list.clear()
+
+        # Add each audio device to the list widget with a link button to the left
+        for device in audio_devices:
+            # Create an empty list item
+            item = QListWidgetItem()
+
+            # Create a QWidget to contain the button and device name
+            widget = QWidget()
+            layout = QHBoxLayout()  # Horizontal layout for button and label
+
+            # Create the link button with a fixed size
+            link_button = QPushButton("Link")
+            link_button.setFixedWidth(80)  # Set a fixed width for the buttons
+            # Connect the button click event to show the device link menu
+            link_button.clicked.connect(
+                lambda checked, device=device, button=link_button: self.show_host_device_link_menu(device, audio_devices,
+                                                                                              button))
+
+            # Create the label for the device name
+            device_label = QLabel(device)
+
+            # Add the button and label to the layout
+            layout.addWidget(link_button)  # Button first (left side)
+            layout.addWidget(device_label)  # Label next (right side)
+
+            # Set the layout to the QWidget
+            widget.setLayout(layout)
+
+            # Attach the QWidget to the QListWidgetItem
+            item.setSizeHint(widget.sizeHint())  # Make sure the widget size fits the item
+            self.host_audio_devices_list.addItem(item)
+            self.host_audio_devices_list.setItemWidget(item, widget)
+
+    def refresh_host_linked_devices(self):
         """Fetch and display linked devices."""
         if self.selected_host:
             # Fetch the linked devices using the 'pw-link -l' command
-            linked_devices_output = self.fetch_linked_devices(
+            linked_devices_output = self.fetch_host_linked_devices(
                 self.selected_host['host_ip'],
                 self.selected_host['user'],
                 self.selected_host['password']
             )
 
+            # Clear the existing linked devices list by setting a new widget
+            self.host_linked_devices_list.setWidget(QWidget())  # Removes current content
 
-            # Clear the existing linked devices list
-            self.linked_devices_list.clear()
+            # Create a new QLabel widget to hold the output
+            linked_device_label = QLabel(linked_devices_output)
 
-            self.linked_devices_list.addItem(linked_devices_output)
+            # Create a layout and add the QLabel to it
+            layout = QVBoxLayout()
+            layout.addWidget(linked_device_label)
 
-    def fetch_linked_devices(self, host_ip, user, password):
+            # Create a new QWidget to hold the layout
+            new_widget = QWidget()
+            new_widget.setLayout(layout)
+
+            # Set the new widget as the content of the scroll area
+            self.host_linked_devices_list.setWidget(new_widget)
+
+    def fetch_host_linked_devices(self, host_ip, user, password):
         """Fetch the linked devices from the host using pw-link -ls."""
         try:
             # Establish SSH connection
@@ -1487,7 +1956,7 @@ class USBIPClient(QMainWindow):
             return ""
 
 
-    def show_device_link_menu(self, device, audio_devices, button):
+    def show_host_device_link_menu(self, device, audio_devices, button):
         """Show a menu to select a device to link with."""
         menu = QMenu(self)
 
@@ -1496,14 +1965,14 @@ class USBIPClient(QMainWindow):
             if other_device != device:
                 action = QAction(other_device, self)
                 action.triggered.connect(
-                    lambda checked, device=device, other_device=other_device: self.link_audio_devices(device,
+                    lambda checked, device=device, other_device=other_device: self.link_host_audio_devices(device,
                                                                                                       other_device))
                 menu.addAction(action)
 
         # Show the menu at the position of the clicked button
         menu.exec(button.mapToGlobal(button.pos()))
 
-    def link_audio_devices(self, device1, device2):
+    def link_host_audio_devices(self, device1, device2):
         """Send SSH command to link two audio devices."""
         try:
             # Establish SSH connection
@@ -1524,32 +1993,15 @@ class USBIPClient(QMainWindow):
             else:
                 self.add_message(f"Successfully linked {device1} and {device2}.")
 
-            self.refresh_linked_devices()
+            self.refresh_host_linked_devices()
             # Close the SSH connection
             ssh.close()
 
         except Exception as e:
             self.add_message(f"Failed to link audio devices: {str(e)}")
 
-    def parse_audio_devices(self, pw_cli_output):
-        """Parse and filter audio devices from the pw-cli output."""
-        audio_devices = []
 
-        # Split the output into blocks of each device info
-        device_blocks = pw_cli_output.split('id ')
-
-        for block in device_blocks:
-            # Check if the block contains "Audio" in node.description
-            if "node.description = " in block and "Audio" in block:
-                # Extract the node.name
-                match = re.search(r'node.name = "(.*?)"', block)
-                if match:
-                    audio_device = match.group(1)
-                    audio_devices.append(audio_device)
-
-        return audio_devices
-
-    def fetch_audio_devices(self, host_ip, user, password):
+    def fetch_host_audio_devices(self, host_ip, user, password):
         """Fetch available audio devices from the host using pw-cli."""
         try:
             # Establish SSH connection
@@ -1569,6 +2021,131 @@ class USBIPClient(QMainWindow):
             self.add_message(f"Failed to fetch audio devices: {str(e)}")
             return ""
 
+    def refresh_client_audio_devices(self):
+        """Fetch and display available audio devices for the client."""
+        # Get the list of audio devices from the client
+        pw_cli_output = self.fetch_client_audio_devices()
+
+        # Parse and filter the audio devices
+        audio_devices = self.parse_audio_devices(pw_cli_output)
+
+        # Clear the existing list
+        self.client_audio_devices_list.clear()
+
+        # Add each audio device to the list widget with a link button to the left
+        for device in audio_devices:
+            # Create an empty list item
+            item = QListWidgetItem()
+
+            # Create a QWidget to contain the button and device name
+            widget = QWidget()
+            layout = QHBoxLayout()  # Horizontal layout for button and label
+
+            # Create the link button with a fixed size
+            link_button = QPushButton("Link")
+            link_button.setFixedWidth(80)  # Set a fixed width for the buttons
+            # Connect the button click event to show the device link menu
+            link_button.clicked.connect(
+                lambda checked, device=device, button=link_button: self.show_client_device_link_menu(device, audio_devices,
+                                                                                              button)
+            )
+
+            # Create the label for the device name
+            device_label = QLabel(device)
+
+            # Add the button and label to the layout
+            layout.addWidget(link_button)  # Button first (left side)
+            layout.addWidget(device_label)  # Label next (right side)
+
+            # Set the layout to the QWidget
+            widget.setLayout(layout)
+
+            # Attach the QWidget to the QListWidgetItem
+            item.setSizeHint(widget.sizeHint())  # Make sure the widget size fits the item
+            self.client_audio_devices_list.addItem(item)
+            self.client_audio_devices_list.setItemWidget(item, widget)
+
+    def refresh_client_linked_devices(self):
+        """Fetch and display linked devices for the client."""
+        if self.selected_host:
+            # Fetch the linked devices using the 'pw-link -l' command
+            linked_devices_output = self.fetch_client_linked_devices()
+
+            # Clear the existing linked devices list by setting a new widget
+            self.client_linked_devices_list.setWidget(QWidget())  # Removes current content
+
+            # Create a new QLabel widget to hold the output
+            linked_device_label = QLabel(linked_devices_output)
+
+            # Create a layout and add the QLabel to it
+            layout = QVBoxLayout()
+            layout.addWidget(linked_device_label)
+
+            # Create a new QWidget to hold the layout
+            new_widget = QWidget()
+            new_widget.setLayout(layout)
+
+            # Set the new widget as the content of the scroll area
+            self.client_linked_devices_list.setWidget(new_widget)
+
+    def fetch_client_linked_devices(self):
+        """Fetch the linked devices from the client using pw-link -l."""
+        try:
+            # Run the pw-link -l command locally
+            result = subprocess.run(['pw-link', '-l'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+            output = result.stdout.decode()
+
+            return output
+        except subprocess.CalledProcessError as e:
+            self.add_message(f"Failed to fetch linked devices: {e.stderr.decode()}")
+            return ""
+
+    def show_client_device_link_menu(self, device, audio_devices, button):
+        """Show a menu to select a device to link with."""
+        menu = QMenu(self)
+
+        # Create a menu action for each other device
+        for other_device in audio_devices:
+            if other_device != device:
+                action = QAction(other_device, self)
+                action.triggered.connect(
+                    lambda checked, device=device, other_device=other_device: self.link_client_audio_devices(device,
+                                                                                                             other_device)
+                )
+                menu.addAction(action)
+
+        # Show the menu at the position of the clicked button
+        menu.exec(button.mapToGlobal(button.pos()))
+
+    def link_client_audio_devices(self, device1, device2):
+        """Link two audio devices for the client."""
+        try:
+            # Run the pw-link command locally
+            result = subprocess.run(['pw-link', device1, device2], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                    check=True)
+            output = result.stdout.decode()
+
+            self.add_message(f"Successfully linked {device1} and {device2}.")
+
+            # Refresh the linked devices list
+            self.refresh_client_linked_devices()
+
+        except subprocess.CalledProcessError as e:
+            self.add_message(f"Failed to link devices: {e.stderr.decode()}")
+
+
+    def fetch_client_audio_devices(self):
+        """Fetch available audio devices from the client using pw-cli."""
+        try:
+            # Run the pw-cli ls Node command locally
+            result = subprocess.run(['pw-cli', 'ls', 'Node'], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                    check=True)
+            output = result.stdout.decode()
+
+            return output
+        except subprocess.CalledProcessError as e:
+            self.add_message(f"Failed to fetch audio devices: {e.stderr.decode()}")
+            return ""
 
 class RestartThread(QThread):
     """Thread to handle the restart of USBIP service in the background."""
