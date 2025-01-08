@@ -10,7 +10,7 @@ Special thanks to the developers of USBIP and Pipewire for making this possible.
 
 Note: 
 - Tested/works on openSUSE. 
-- Tested/did not work on Fedora 41.
+- Tested/works on Fedora 41.
 
 How to use:
 - You must have ssh, Pipewire, and USBIP installed, enabled and started on the host device.
@@ -27,8 +27,9 @@ How to use:
   - USBIP requires sudo to connect to devices. You can edit the sudoers file if you trust it (only way to use this gui currently)
     - run: `sudo visudo`
     - Add to bottom of file: `<username> ALL=(ALL) NOPASSWD: /usr/sbin/usbip`
-- I recommend testing pipewire and usbip connections from the terminal to ensure your set up is working.
-- Download and run the executabe inside the dist folder.
+      - replace `<username>` with your username
+- If you have trouble, I recommend testing pipewire and usbip connections from the terminal to ensure your set up is working.
+- Download and run the executable.
 - Add host ip, username, and password.
 - If USBIP is set up correctly and USB devices are available on the host, devices should appear.
   - Sometimes you will need to restart the host usbip service to get it to actually work, so I added a button to do that.
