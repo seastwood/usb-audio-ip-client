@@ -50,11 +50,8 @@ How to use:
 - All connections will remain connected even when the GUI is closed. The actual connections are made with USBIP and Pipewire.
 
 ![Screenshot From 2025-01-07 20-08-16](https://github.com/user-attachments/assets/ea5cbd55-8f6f-4d33-928f-e8df7631b6f9)
-
-![400256908-05e708e0-0319-4cba-8bcf-bc603a5d5b39](https://github.com/user-attachments/assets/02137f18-eb17-4ec6-9877-8427b8acde61)
-
-![400256894-64af2702-612b-48e0-8abf-1fd99f2e26db](https://github.com/user-attachments/assets/931dbcaf-54c0-4878-9414-56b4f641dd81)
-
+![Screenshot From 2025-01-08 16-04-55](https://github.com/user-attachments/assets/85d69934-299f-412e-8ce5-72dc4dad8ef9)
+![Screenshot From 2025-01-08 16-05-51](https://github.com/user-attachments/assets/a03826a1-bd3b-4642-ae19-c1cf1f28d488)
 ![400256932-3b5e539d-89fa-42e9-b17e-81459cd13d1c](https://github.com/user-attachments/assets/f4dc563a-a164-42b1-a8b7-590ee552a356)
 
 To do:
