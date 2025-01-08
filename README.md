@@ -14,7 +14,9 @@ Note:
 
 How to use:
 - You must have ssh, Pipewire, and USBIP installed, enabled and started on the host device.
-  - Make sure the usbip driver is loaded: `sudo modprobe vhci_hcd`   
+  - Make sure the usbip drivers are loaded:
+    - `sudo modprobe -r vhci_hcd`
+    - `sudo modprobe vhci_hcd`
 - Pipewire and USBIP must also be installed, enabled, and started on the client device.
   - Make sure the usbip driver is loaded: `sudo modprobe vhci_hcd`
   - USBIP requires sudo to connect to devices. You can edit the sudoers file if you trust it (only way to use this gui currently)
