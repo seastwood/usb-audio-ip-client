@@ -37,17 +37,16 @@ How to use:
   - The only setting necessary to change is the Host Destination IP, which is the CLIENT IP.
   - You may also want to increase the Audio Rate for better quality, but this may interfere with USBIP devices if set too high.
   - Once this is done, you should have a new input device called "rtp-source" (or whatever you changed it to) in your computer settings.
-- If Pipewire is set up correctly and audio devices are available, devices should appear in the list.
-  - You will want to link the INPUT device (if one is plugged in) to the SINK device you configured.
+- If Pipewire is set up correctly and audio devices are available, devices should appear in the lists. The following configuration only requires setting these settings on the Host Devices:
+  - You will want to link the INPUT device (if one is plugged in) to the SINK device you configured. Input -> RTP-sink-sender (It will not work the other way around).
     - The configured sink device may not appear without an output device connected to the host.
       - I am using a usb audio adapter with both a separate microphone and speaker plug, on which I only need to have a microphone plugged in.
       - I found that a headset adapter with a headset plugged in works as well.
-
-  - Then click "Restart Client PW" to allow the client to sync with the new host audio link.
     - You should see the link appear in the Host Linked Audio Devices list.
-    - You should now be recieving sound through your new rtp-source input device.
-  - This is not configured to send audio back to the host.
-    - I stream the sound output through Moonlight, which will need to be restarted if this was configured through the Moonlight stream. This is necessary to get the Sunshine Sink Streams to re-initialize because the Pipewire service was restarted during the stream.
+    - You should now be recieving sound through your new RTP-source-receiver input device on your pc.
+      - If it doesn't, try clicking "Restart Client PW" to allow the client to sync with the new host audio link.
+  - To stream sound back to the host device(sending it out of your pc) link the RTP-source-receiver to the output device. RTP-source-receiver -> output. (It will not work the other way around)
+    - Note: If you configured this through a Moonlight session, the session will need to be restarted. This is necessary to get the Sunshine Sink Streams to re-initialize because the Pipewire service was restarted during the stream.
 - All connections will remain connected even when the GUI is closed. The actual connections are made with USBIP and Pipewire.
 
 ![Screenshot From 2025-01-07 20-08-16](https://github.com/user-attachments/assets/ea5cbd55-8f6f-4d33-928f-e8df7631b6f9)
