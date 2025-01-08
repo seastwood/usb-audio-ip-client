@@ -44,6 +44,8 @@ How to use:
       - I found that a headset adapter with a headset plugged in works as well.
 
   - Then click "Restart Client PW" to allow the client to sync with the new host audio link.
+    - You should see the link appear in the Host Linked Audio Devices list.
+    - You should now be recieving sound through your new rtp-source input device.
   - This is not configured to send audio back to the host.
     - I stream the sound output through Moonlight, which will need to be restarted if this was configured through the Moonlight stream. This is necessary to get the Sunshine Sink Streams to re-initialize because the Pipewire service was restarted during the stream.
 - All connections will remain connected even when the GUI is closed. The actual connections are made with USBIP and Pipewire.
