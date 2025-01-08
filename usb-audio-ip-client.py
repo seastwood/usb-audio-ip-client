@@ -19,10 +19,7 @@ import os
 # Set the PATH as a global variable
 # Define the full paths to the commands
 SUDO_PATH = "/usr/bin/sudo"
-USBIP_PATH = "/bin/usbip"
 CONFIG_FILE = "config.json"
-AUTO_CONNECT_FILE = "auto_connect_devices.json"
-
 AUTO_CONNECT_FILE = "auto_connect_devices.json"
 
 def load_auto_connect_devices():
@@ -418,7 +415,7 @@ class HostSinkConfigurationDialog(QDialog):
         else:
             # print(f"Output: {output}")
             # print("RTP sink module enabled successfully on remote host.")
-            self.parent_client.add_messagef(f"Output: {output}")
+            self.parent_client.add_message(f"Output: {output}")
             self.parent_client.add_message("RTP sink module enabled successfully on remote host.")
 
         # Close the SSH connection
@@ -615,6 +612,7 @@ def save_last_selected_host(index):
             json.dump(config, f)
     except Exception as e:
         print(f"Error saving last selected host: {e}")
+
 
 
 
@@ -893,6 +891,7 @@ class USBIPClient(QMainWindow):
 
         try:
             # print(f"Attempting to connect to {host_ip} with user {username}")
+            self.add_message(f"Attempting to connect to {host_ip} with user {username}")
             ssh = paramiko.SSHClient()
 
             # Set missing host key policy to auto add
@@ -901,6 +900,7 @@ class USBIPClient(QMainWindow):
             # Connect to the remote SSH server
             ssh.connect(host_ip, username=username, password=password)
             # print(f"Connected to {host_ip}. Restarting Host Pipewire service...")
+            self.add_message(f"Connected to {host_ip}. Restarting Host Pipewire service...")
 
             # Execute the command to restart the USBIP service
             stdin, stdout, stderr = ssh.exec_command("systemctl --user restart pipewire")
@@ -928,6 +928,7 @@ class USBIPClient(QMainWindow):
         finally:
             ssh.close()
             # print("SSH connection closed.")
+            self.add_message("SSH connection closed.")
 
     def restart_usbip(self):
         """Handle the restart of USBIP service and refresh the device list."""
@@ -943,6 +944,7 @@ class USBIPClient(QMainWindow):
         self.restart_dialog = QMessageBox(self)
         # self.restart_dialog.setIcon(QMessageBox.Information)
         self.restart_dialog.setText("Restarting Host USBIP. This may take a while...")
+        self.add_message("Restarting Host USBIP. This may take a while... Message will appear below when complete.")
         self.restart_dialog.setWindowTitle("Restarting USBIP Service")
         # self.restart_dialog.setStandardButtons(QMessageBox.NoButton)  # No buttons (just informational)
         self.restart_dialog.setModal(True)
@@ -971,6 +973,7 @@ class USBIPClient(QMainWindow):
             dialog.exec()
         else:
             print("No host selected!")
+            self.add_message("No host selected!")
 
 
 
@@ -1071,9 +1074,11 @@ class USBIPClient(QMainWindow):
             else:
                 # Check the stderr for details on why it failed
                 # print(f"Ping failed: {response.stderr.decode()}")
+                self.add_message(f"Ping failed: {response.stderr.decode()}")
                 return False
         except Exception as e:
             # print(f"Error while pinging host {host_ip}: {e}")
+            self.add_message(f"Error while pinging host {host_ip}: {e}")
             return False
 
     def refresh_device_list(self):
@@ -1141,7 +1146,7 @@ class USBIPClient(QMainWindow):
                     if device.busid in self.auto_connect_devices and not device.connected:
                         self.bind_unbind_device(device.host_ip, self.selected_host['user'],
                                                 self.selected_host['password'],
-                                                "bind", device.busid)
+                                                "bind", device.busid, False)
                         device.set_connected()
 
         except Exception as e:
@@ -1155,6 +1160,25 @@ class USBIPClient(QMainWindow):
     #     self.device_list.addItem(error_item)  # Add the item to the list
     #     self.device_list.setItemWidget(error_item, error_message)  # Set the QLabel as the widget for the item
 
+    def force_connect_device(self, item):
+        device_widget = self.device_list.itemWidget(item)  # Get the widget to access the Device object
+        if device_widget.device:
+            device = device_widget.device  # Retrieve the Device object
+
+            # Use the device's host_ip and busid for the connection
+            host_ip = device.host_ip
+            busid = device.busid
+            command = "bind"
+
+            # Call the bind/unbind method using the host_ip and busid
+            if self.bind_unbind_device(host_ip, self.selected_host['user'], self.selected_host['password'], command, busid, True):
+
+                # Update the widget with the green dot
+                item_widget = self.device_list.itemWidget(item)
+                if item_widget.device:
+                    item_widget.set_connected()
+                    device.set_connected()
+
     def connect_device(self, item):
         device_widget = self.device_list.itemWidget(item)  # Get the widget to access the Device object
         if device_widget.device:
@@ -1166,7 +1190,7 @@ class USBIPClient(QMainWindow):
             command = "bind"
 
             # Call the bind/unbind method using the host_ip and busid
-            if self.bind_unbind_device(host_ip, self.selected_host['user'], self.selected_host['password'], command, busid):
+            if self.bind_unbind_device(host_ip, self.selected_host['user'], self.selected_host['password'], command, busid, False):
 
                 # Update the widget with the green dot
                 item_widget = self.device_list.itemWidget(item)
@@ -1185,7 +1209,7 @@ class USBIPClient(QMainWindow):
             command = "unbind"
 
             # Call the bind/unbind method using the host_ip and busid
-            if self.bind_unbind_device(host_ip, self.selected_host['user'], self.selected_host['password'], command, busid):
+            if self.bind_unbind_device(host_ip, self.selected_host['user'], self.selected_host['password'], command, busid, False):
 
                 # Update the widget with the green dot
                 item_widget = self.device_list.itemWidget(item)
@@ -1220,6 +1244,7 @@ class USBIPClient(QMainWindow):
                 menu.addAction("Detach", lambda: self.disconnect_device(item))
             else:
                 menu.addAction("Attach", lambda: self.connect_device(item))
+                menu.addAction("Force Attach", lambda: self.force_connect_device(item))
             if device.busid in self.auto_connect_devices:
                 menu.addAction("Remove from Auto-Connect", lambda: self.remove_auto_connect_device(device))
             else:
@@ -1234,10 +1259,11 @@ class USBIPClient(QMainWindow):
         # elif action == detach_action:
         #     self.disconnect_device(item)
 
-    def bind_unbind_device(self, host_ip, user, password, command, busid):
+    def bind_unbind_device(self, host_ip, user, password, command, busid, force):
         """Bind or unbind a device based on user selection."""
         try:
             print(f"Attempting to connect to {host_ip} with user {user}")
+            self.add_message(f"Attempting to connect to {host_ip} with user {user}")
             ssh = paramiko.SSHClient()
 
             # Set missing host key policy to auto add
@@ -1245,25 +1271,46 @@ class USBIPClient(QMainWindow):
 
             # Print the host IP and username for debugging
             print(f"Connecting to {host_ip} as {user}...")
-
+            self.add_message(f"Connecting to {host_ip} as {user}...")
             # Connect to the remote SSH server
             ssh.connect(host_ip, username=user, password=password)
 
             print(f"Connected to {host_ip}. Executing command...")
+            self.add_message(f"Connected to {host_ip}. Executing command...")
+
+            if force:
+                stdin, stdout, stderr = ssh.exec_command(f'sudo usbip unbind -b {busid}')
+                # Read the output once and store it
+                stdout_output = stdout.read().decode()
+                stderr_output = stderr.read().decode()
+
+                # Print command output for debugging
+                print(f"Command output: {stdout_output}")
+                self.add_message(f"Command output: {stdout_output}")
+                print(f"Command error: {stderr_output}")
+                self.add_message(f"Command output: {stderr_output}")
 
             # Execute the command
             stdin, stdout, stderr = ssh.exec_command(f'sudo usbip {command} -b {busid}')
 
+            # Read the output once and store it
+            stdout_output = stdout.read().decode()
+            stderr_output = stderr.read().decode()
+
             # Print command output for debugging
-            print(f"Command output: {stdout.read().decode()}")
-            print(f"Command error: {stderr.read().decode()}")
+            print(f"Command output: {stdout_output}")
+            self.add_message(f"Command output: {stdout_output}")
+            print(f"Command error: {stderr_output}")
+            self.add_message(f"Command output: {stderr_output}")
 
         except paramiko.SSHException as e:
             print(f"SSH connection error: {e}")
+            self.add_message(f"SSH connection error: {e}")
             return False
         finally:
             ssh.close()
             print("SSH connection closed.")
+            self.add_message("SSH connection closed.")
         if command == "unbind":
             return True
         if command == "bind":
@@ -1278,9 +1325,11 @@ class USBIPClient(QMainWindow):
 
             if result.returncode == 0:
                 print(f"Successfully attached {busid} from {host_ip}.")
+                self.add_message(f"Successfully attached {busid} from {host_ip}.")
                 return True
             else:
                 print(f"Failed to attach {busid} from {host_ip}. {result.stderr.decode()}")
+                self.add_message(f"Failed to attach {busid} from {host_ip}. {result.stderr.decode()}")
                 return False
 
     def delete_host(self):
@@ -1304,7 +1353,7 @@ class USBIPClient(QMainWindow):
             # Load the last selected host index
             last_selected_index = self.load_last_selected_host()
             print(f"Loaded last selected index: {last_selected_index}")
-
+            # self.add_message(f"Loaded last selected index: {last_selected_index}")
             # Ensure dropdown is populated before setting the index
             if last_selected_index is not None and 0 <= last_selected_index < len(self.hosts):
                 self.host_dropdown.setCurrentIndex(last_selected_index)
@@ -1540,6 +1589,7 @@ class RestartThread(QThread):
 
             # Restart USBIP service
             stdin, stdout, stderr = ssh.exec_command("sudo systemctl restart usbipd")
+            # self.parent.add_message("Restarting USBIP Client... Success Message will appear when complete.")
 
             # Capture the output
             output = stdout.read().decode()
@@ -1547,9 +1597,11 @@ class RestartThread(QThread):
 
             if error:
                 self.restart_complete_signal.emit("error", f"Failed to restart USBIP service: {error}")
+                # self.parent.add_message("error", f"Failed to restart USBIP service: {error}")
             else:
                 self.restart_complete_signal.emit("info", "USBIP service restarted successfully.")
-                # self.parent().refresh_device_list()
+                # self.parent.add_message("info", "USBIP service restarted successfully.")
+                # self.parent.refresh_device_list()
 
         except paramiko.SSHException as e:
             self.restart_complete_signal.emit("error", f"SSH connection error: {e}")
