@@ -28,7 +28,7 @@ How to use:
     - run: `sudo visudo`
     - Add to bottom of file: `<username> ALL=(ALL) NOPASSWD: /usr/sbin/usbip`
       - replace `<username>` with your username
-- I recommend testing pipewire and usbip connections from the terminal to ensure your set up is working.
+- If you have trouble, I recommend testing pipewire and usbip connections from the terminal to ensure your set up is working.
 - Download and run the executabe inside the dist folder.
 - Add host ip, username, and password.
 - If USBIP is set up correctly and USB devices are available on the host, devices should appear.
