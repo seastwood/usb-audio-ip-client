@@ -47,7 +47,7 @@ How to use:
     - I stream the sound output through Moonlight, which will need to be restarted if this was configured through the Moonlight stream. This is necessary to get the Sunshine Sink Streams to re-initialize because the Pipewire service was restarted during the stream.
 - All connections will remain connected even when the GUI is closed. The actual connections are made with USBIP and Pipewire.
 
-![400256855-8b6d3345-bc59-4f34-8420-3544ef35bbb2](https://github.com/user-attachments/assets/fc5b1639-60f7-4bea-a94e-6283c33fc6bd)
+![Screenshot From 2025-01-07 20-08-16](https://github.com/user-attachments/assets/ea5cbd55-8f6f-4d33-928f-e8df7631b6f9)
 
 ![400256908-05e708e0-0319-4cba-8bcf-bc603a5d5b39](https://github.com/user-attachments/assets/02137f18-eb17-4ec6-9877-8427b8acde61)
 
