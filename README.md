@@ -36,6 +36,7 @@ How to use:
 - Configure pipewire host sink and client source settings. (The Apply-Enable-Test button will restart Pipewire on the host and client in order to enable the new modules)
   - The only setting necessary to change is the Host Destination IP, which is the CLIENT IP.
   - You may also want to increase the Audio Rate for better quality, but this may interfere with USBIP devices if set too high.
+  - Once this is done, you should have a new input device called "rtp-source" (or whatever you changed it to) in your computer settings.
 - If Pipewire is set up correctly and audio devices are available, devices should appear in the list.
   - You will want to link the INPUT device (if one is plugged in) to the SINK device you configured.
     - The configured sink device may not appear without an output device connected to the host.
