@@ -10,7 +10,7 @@ Special thanks to the developers of USBIP and Pipewire for making this possible.
 
 Note: 
 - Tested/works on openSUSE. 
-- Tested/did not work on Fedora 41.
+- Tested/works on Fedora 41.
 
 How to use:
 - You must have ssh, Pipewire, and USBIP installed, enabled and started on the host device.
