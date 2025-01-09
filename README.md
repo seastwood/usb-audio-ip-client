@@ -24,6 +24,19 @@ How to use:
     - `sudo modprobe usbip_host`
     - To make them load on boot: `sudo nano /etc/modules-load.d/usbip.conf`
       - Add to file: `vhci_hcd` and `usbip_host`
+    - usbip needs to be set up as a service `sudo nano /etc/systemd/system/usbipd.service`
+      - place in there:
+        - [Unit]
+        - Description=USB/IP Daemon
+        - After=network.target
+
+        - [Service]
+        - ExecStart=/usr/sbin/usbipd -D
+        - Restart=always
+
+        - [Install]
+        - WantedBy=multi-user.target
+      - save, start, and enable it.
 - Pipewire and USBIP must also be installed, enabled, and started on the client device.
   - Make sure the usbip driver is loaded:
     - `sudo modprobe vhci_hcd`
