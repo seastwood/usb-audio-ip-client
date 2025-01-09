@@ -1,5 +1,7 @@
 This is a Linux GUI for easier control of both USBIP and Pipewire services.
 
+It lets you connect any number of usb devices from another linux host (or multiple hosts) into the machine running this GUI as if it's directly plugged into it. Pipewire is the software directing audio traffic in linux machines, and it utilizes that to stream sound between other devices and the device running this GUI. 
+
 My Specific Use Case:
 
 - I designed this because I want to use multiple USB devices and a microphone while game streaming with Moonlght/Sunshine on devices that don't allow device passthrough.
