@@ -90,9 +90,9 @@ class HostSinkConfigurationDialog(QDialog):
         tab_layout = QVBoxLayout()
 
         # Titles
-        client_title = QLabel("Client Source Settings")
+        client_title = QLabel("Client Source Settings (This Device)")
         client_title.setStyleSheet("font-weight: bold;")
-        host_title = QLabel("Host Sink Settings")
+        host_title = QLabel("Host Sink Settings (Other Device)")
         host_title.setStyleSheet("font-weight: bold;")
 
         # Left column for Client Source Settings
@@ -107,11 +107,11 @@ class HostSinkConfigurationDialog(QDialog):
 
         self.client_source_latency_field = QSpinBox()
         self.client_source_latency_field.setRange(1, 1000)
-        self.client_source_latency_field.setValue(24)
+        self.client_source_latency_field.setValue(12)
         client_source_layout.addRow("Client Latency (ms):", self.client_source_latency_field)
 
         self.client_source_always_process_field = QCheckBox("Always Process")
-        self.client_source_always_process_field.setChecked(True)
+        self.client_source_always_process_field.setChecked(False)
         client_source_layout.addRow("Always Process:", self.client_source_always_process_field)
 
         self.client_source_session_name_field = QLineEdit("RTP-source-receiver")
@@ -160,7 +160,7 @@ class HostSinkConfigurationDialog(QDialog):
         host_sink_layout.addRow("TTL:", self.host_sink_ttl_field)
 
         self.host_sink_loop_field = QCheckBox("Loop")
-        self.host_sink_loop_field.setChecked(True)
+        self.host_sink_loop_field.setChecked(False)
         host_sink_layout.addRow("Net Loop:", self.host_sink_loop_field)
 
         self.host_sink_min_ptime_field = QSpinBox()
@@ -219,9 +219,9 @@ class HostSinkConfigurationDialog(QDialog):
         tab_layout = QVBoxLayout()
 
         # Titles
-        client_title = QLabel("Client Sink Settings")
+        client_title = QLabel("Client Sink Settings (This Device)")
         client_title.setStyleSheet("font-weight: bold;")
-        host_title = QLabel("Host Source Settings")
+        host_title = QLabel("Host Source Settings (Other Device)")
         host_title.setStyleSheet("font-weight: bold;")
 
         # Left column for Client Sink Settings
@@ -248,7 +248,7 @@ class HostSinkConfigurationDialog(QDialog):
         client_sink_layout.addRow("TTL:", self.client_sink_ttl_field)
 
         self.client_sink_loop_field = QCheckBox("Loop")
-        self.client_sink_loop_field.setChecked(True)
+        self.client_sink_loop_field.setChecked(False)
         client_sink_layout.addRow("Net Loop:", self.client_sink_loop_field)
 
         self.client_sink_min_ptime_field = QSpinBox()
@@ -269,7 +269,7 @@ class HostSinkConfigurationDialog(QDialog):
 
         self.client_sink_audio_rate_field = QSpinBox()
         self.client_sink_audio_rate_field.setRange(8000, 96000)
-        self.client_sink_audio_rate_field.setValue(16000)
+        self.client_sink_audio_rate_field.setValue(32000)
         client_sink_layout.addRow("Audio Rate:", self.client_sink_audio_rate_field)
 
         self.client_sink_audio_channels_field = QSpinBox()
@@ -295,11 +295,11 @@ class HostSinkConfigurationDialog(QDialog):
 
         self.host_source_latency_field = QSpinBox()
         self.host_source_latency_field.setRange(1, 1000)
-        self.host_source_latency_field.setValue(24)
+        self.host_source_latency_field.setValue(8)
         host_source_layout.addRow("Client Latency (ms):", self.host_source_latency_field)
 
         self.host_source_always_process_field = QCheckBox("Always Process")
-        self.host_source_always_process_field.setChecked(True)
+        self.host_source_always_process_field.setChecked(False)
         host_source_layout.addRow("Always Process:", self.host_source_always_process_field)
 
         self.host_source_session_name_field = QLineEdit("RTP-source-receiver")
@@ -310,7 +310,7 @@ class HostSinkConfigurationDialog(QDialog):
 
         self.host_source_audio_rate_field = QSpinBox()
         self.host_source_audio_rate_field.setRange(8000, 96000)
-        self.host_source_audio_rate_field.setValue(16000)
+        self.host_source_audio_rate_field.setValue(32000)
         host_source_layout.addRow("Audio Rate:", self.host_source_audio_rate_field)
 
         self.host_source_audio_channels_field = QSpinBox()
@@ -354,7 +354,7 @@ class HostSinkConfigurationDialog(QDialog):
                 self.host_sink_destination_port_field.setValue(host_sink_settings.get("destination_port", 46000))
                 self.host_sink_mtu_field.setValue(host_sink_settings.get("mtu", 256))
                 self.host_sink_ttl_field.setValue(host_sink_settings.get("ttl", 1))
-                self.host_sink_loop_field.setChecked(host_sink_settings.get("loop", True))
+                self.host_sink_loop_field.setChecked(host_sink_settings.get("loop", False))
                 self.host_sink_min_ptime_field.setValue(host_sink_settings.get("min_ptime", 2))
                 self.host_sink_max_ptime_field.setValue(host_sink_settings.get("max_ptime", 10))
                 self.host_sink_session_name_field.setText(host_sink_settings.get("session_name", ""))
@@ -369,7 +369,7 @@ class HostSinkConfigurationDialog(QDialog):
 
                 self.client_source_source_ip_client_field.setText(client_source_settings.get("source_ip", ""))
                 self.client_source_source_port_client_field.setValue(client_source_settings.get("source_port", 46000))
-                self.client_source_latency_field.setValue(client_source_settings.get("latency", 24))
+                self.client_source_latency_field.setValue(client_source_settings.get("latency", 12))
                 self.client_source_always_process_field.setChecked(client_source_settings.get("always_process", True))
                 self.client_source_session_name_field.setText(client_source_settings.get("session_name", ""))
                 self.client_source_audio_format_field.setText(client_source_settings.get("audio_format", ""))
@@ -383,11 +383,11 @@ class HostSinkConfigurationDialog(QDialog):
 
                 self.host_source_source_ip_field.setText(host_source_settings.get("source_ip", ""))
                 self.host_source_source_port_field.setValue(host_source_settings.get("source_port", 46000))
-                self.host_source_latency_field.setValue(host_source_settings.get("latency", 24))
-                self.host_source_always_process_field.setChecked(host_source_settings.get("always_process", True))
+                self.host_source_latency_field.setValue(host_source_settings.get("latency", 8))
+                self.host_source_always_process_field.setChecked(host_source_settings.get("always_process", False))
                 self.host_source_session_name_field.setText(host_source_settings.get("session_name", ""))
                 self.host_source_audio_format_field.setText(host_source_settings.get("audio_format", ""))
-                self.host_source_audio_rate_field.setValue(host_source_settings.get("audio_rate", 16000))
+                self.host_source_audio_rate_field.setValue(host_source_settings.get("audio_rate", 32000))
                 self.host_source_audio_channels_field.setValue(host_source_settings.get("audio_channels", 1))
                 self.host_source_node_name_field.setText(host_source_settings.get("node_name", ""))
                 self.host_source_node_description_field.setText(host_source_settings.get("node_description", ""))
@@ -400,12 +400,12 @@ class HostSinkConfigurationDialog(QDialog):
                 self.client_sink_destination_port_field.setValue(client_sink_settings.get("destination_port", 46000))
                 self.client_sink_mtu_field.setValue(client_sink_settings.get("mtu", 256))
                 self.client_sink_ttl_field.setValue(client_sink_settings.get("ttl", 1))
-                self.client_sink_loop_field.setChecked(client_sink_settings.get("loop", True))
+                self.client_sink_loop_field.setChecked(client_sink_settings.get("loop", False))
                 self.client_sink_min_ptime_field.setValue(client_sink_settings.get("min_ptime", 2))
                 self.client_sink_max_ptime_field.setValue(client_sink_settings.get("max_ptime", 10))
                 self.client_sink_session_name_field.setText(client_sink_settings.get("session_name", ""))
                 self.client_sink_audio_format_field.setText(client_sink_settings.get("audio_format", ""))
-                self.client_sink_audio_rate_field.setValue(client_sink_settings.get("audio_rate", 16000))
+                self.client_sink_audio_rate_field.setValue(client_sink_settings.get("audio_rate", 32000))
                 self.client_sink_audio_channels_field.setValue(client_sink_settings.get("audio_channels", 1))
                 self.client_sink_node_name_field.setText(client_sink_settings.get("node_name", ""))
                 self.client_sink_node_description_field.setText(client_sink_settings.get("node_description", ""))
