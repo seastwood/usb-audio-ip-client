@@ -15,6 +15,7 @@ Note:
 - Tested/works on Fedora 41.
 - No other distrobutions tested
 - This does not connect to any servers, so you will need to periodically check for updates here and download the new executable.
+- The "client" device is the one running the GUI. The host is the device with the usb devices physically plugged into it.
 
 How to use:
 - You must have ssh, Pipewire, and USBIP installed, enabled and started on the host device.
