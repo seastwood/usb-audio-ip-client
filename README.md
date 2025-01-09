@@ -36,7 +36,8 @@ How to use:
           Restart=always
 
           [Install]
-          WantedBy=multi-user.target```
+          WantedBy=multi-user.target
+          ```
       - save, start, and enable it.
 - Pipewire and USBIP must also be installed, enabled, and started on the client device.
   - Make sure the usbip driver is loaded:
