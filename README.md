@@ -34,8 +34,10 @@ How to use:
 - If USBIP is set up correctly and USB devices are available on the host, devices should appear.
   - Sometimes you will need to restart the host usbip service to get it to actually work, so I added a button to do that.
 - Configure pipewire host sink and client source settings. (The Apply-Enable-Test button will restart Pipewire on the host and client in order to enable the new modules)
-  - The only setting necessary to change is the Host Destination IP, which is the CLIENT IP.
-  - You may also want to increase the Audio Rate for better quality, but this may interfere with USBIP devices if set too high.
+  - The only setting necessary to change is the Destination IPs in the Sender and Receiver tabs.
+    - In the Sender tab, set it to the other device ip.
+    - In the Receiver tab, set it to the GUI device ip.
+  - You may also want to adjust the Audio Rate to your preference, but I tried to optimize it.
   - Once this is done, you should have a new input device called "rtp-source" (or whatever you changed it to) in your computer settings.
 - If Pipewire is set up correctly and audio devices are available, devices should appear in the lists. The following configuration only requires setting these settings on the Host Devices:
   - You will want to link the INPUT device (if one is plugged in) to the SINK device you configured. Input -> RTP-sink-sender (It will not work the other way around).
