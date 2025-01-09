@@ -38,7 +38,7 @@ How to use:
           [Install]
           WantedBy=multi-user.target
           ```
-        - save, start, and enable it.
+        - save, start, and enable it as usbipd.
 - Pipewire and USBIP must also be installed, enabled, and started on the client device.
   - Make sure the usbip driver is loaded:
     - `sudo modprobe vhci_hcd`
