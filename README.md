@@ -26,7 +26,7 @@ How to use:
       - Add to file: `vhci_hcd` and `usbip_host`
     - usbip needs to be set up as a service `sudo nano /etc/systemd/system/usbipd.service`
       - place in there:
-        - [Unit]
+        - ```[Unit]
           Description=USB/IP Daemon
           After=network.target
 
@@ -35,7 +35,7 @@ How to use:
           Restart=always
 
           [Install]
-          WantedBy=multi-user.target
+          WantedBy=multi-user.target```
       - save, start, and enable it.
 - Pipewire and USBIP must also be installed, enabled, and started on the client device.
   - Make sure the usbip driver is loaded:
