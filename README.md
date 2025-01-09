@@ -64,6 +64,7 @@ How to use:
 
 To do:
 - Make USBIP Auto-Connect more automatic. (Currently only auto connects when it starts/on refresh)
+  - May just add a configurable polling option for this.
 - Allow automation of Pipewire Links
 - Add more Pipewire module control and functionality, such as sending a Client Sink to Host Source.
 - Clean up code.
