@@ -43,7 +43,8 @@ How to use:
     - In the Sender tab, set it to the other device ip.
     - In the Receiver tab, set it to the GUI device ip.
   - You may also want to adjust the Audio Rate to your preference, but I tried to optimize it.
-  - Once this is done, you should have a new input device called "rtp-source" (or whatever you changed it to) in your computer settings.
+  - Once this is done, you should have a new input device called "RTP-source-receiver" (or whatever you changed it to) in your computer settings.
+  - You should also have a new output device called RTP-sink-sender.
 - If Pipewire is set up correctly and audio devices are available, devices should appear in the lists. The following configuration only requires setting these settings on the Host Devices:
   - You will want to link the INPUT device (if one is plugged in) to the SINK device you configured. Input -> RTP-sink-sender (It will not work the other way around).
     - The configured sink device may not appear without an output device connected to the host.
