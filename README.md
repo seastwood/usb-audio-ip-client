@@ -26,7 +26,8 @@ How to use:
       - Add to file: `vhci_hcd` and `usbip_host`
     - usbip needs to be set up as a service `sudo nano /etc/systemd/system/usbipd.service`
       - place in there:
-        - ```[Unit]
+        - ```
+          [Unit]
           Description=USB/IP Daemon
           After=network.target
 
