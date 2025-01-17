@@ -49,6 +49,7 @@ How to use:
     - Add to bottom of file: `<username> ALL=(ALL) NOPASSWD: /usr/sbin/usbip`
       - replace `<username>` with your username
 - If you have trouble, I recommend testing pipewire and usbip connections from the terminal to ensure your set up is working.
+- ssh port 20 and usbip pot 3240 must be allowed.
 - Download and run the executable in the dist folder.
 - Add host ip, username, and password.
 - If USBIP is set up correctly and USB devices are available on the host, devices should appear.
