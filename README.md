@@ -79,7 +79,7 @@ How to use:
 ![400256932-3b5e539d-89fa-42e9-b17e-81459cd13d1c](https://github.com/user-attachments/assets/f4dc563a-a164-42b1-a8b7-590ee552a356)
 
 To do:
-- Make USBIP Auto-Connect more automatic. (Currently only auto connects when it starts/on refresh)
+- Make USBIP Auto-Connect more automatic. (Currently only auto connects when it starts/on refresh and doesn't always work)
   - May just add a configurable polling option for this.
 - Allow automation of Pipewire Links
 - Add more Pipewire module control and functionality, such as sending a Client Sink to Host Source. (done)
