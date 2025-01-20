@@ -89,4 +89,4 @@ To do:
 - Refactor Classes and Methods.
 - Make more object oriented.
 - Better Error Handling
-- More Feedback Messages (semi-done, could improve the error checks to better indicate the problem)
+- More Feedback Messages (semi-done, could improve the error checks to better indicate why an issue occurs)
