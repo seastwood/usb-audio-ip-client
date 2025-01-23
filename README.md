@@ -19,6 +19,7 @@ Note:
 
 How to use:
 - You must have ssh, Pipewire, and USBIP installed, enabled and started on the host device.
+  - ssh into the host device first and accept the fingerprint if you haven't already.
   - Make sure the usbip drivers are loaded:
     - `sudo modprobe vhci_hcd`
     - `sudo modprobe usbip_host`
