@@ -55,7 +55,7 @@ How to use:
 - Add host ip, username, and password.
 - If USBIP is set up correctly and USB devices are available on the host, devices should appear.
   - Sometimes you will need to restart the host usbip service to get it to actually work, so I added a button to do that.
-  - If that doesn't work, go to the host and check the status of usbipd 'sudo systemctl status usbipd' it should be working and listening on port 3240.
+  - If that doesn't work, go to the host and check the status of usbipd `sudo systemctl status usbipd` it should be working and listening on port 3240.
   - I've had this randomly fail and needing to be manually restarted.
   - I've also had to reboot the host device to get this to work.
   - It's possible there could be an issue caused from having both ethernet and wifi active at the same time on the host device.
