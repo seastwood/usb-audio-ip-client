@@ -1508,111 +1508,119 @@ class USBIPClient(QMainWindow):
             # Perform the ping using the system's ping command
             response = subprocess.run(
                 ["ping", "-c", "1", host_ip],  # Ping once (-c 1)
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                timeout=5  # Add a timeout to prevent hanging
             )
 
             # Check if the response indicates success (exit code 0)
             if response.returncode == 0:
                 return True
             else:
-                # Check the stderr for details on why it failed
-                # print(f"Ping failed: {response.stderr.decode()}")
-                self.add_message(f"Ping failed: {response.stderr.decode()}")
+                # Log the stderr for details on why it failed
+                self.add_message(f"Ping failed: {response.stderr.decode().strip()}")
                 return False
+        except subprocess.TimeoutExpired:
+            self.add_message(f"Ping to {host_ip} timed out.")
+            return False
         except Exception as e:
-            # print(f"Error while pinging host {host_ip}: {e}")
             self.add_message(f"Error while pinging host {host_ip}: {e}")
+            return False
+
+    def validate_credentials(self, host_ip, username, password):
+        """Validate the username and password by attempting a lightweight SSH connection."""
+        try:
+            # Create an SSH client
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+            # Attempt to connect to the host
+            ssh.connect(host_ip, username=username, password=password, timeout=10)
+            ssh.close()  # Close the connection if successful
+            return True
+        except paramiko.AuthenticationException:
+            self.add_message("Authentication failed: Incorrect username or password.")
+            return False
+        except Exception as e:
+            self.add_message(f"Failed to validate credentials: {str(e)}")
             return False
 
     def refresh_device_list(self):
         self.device_list.clear()
         try:
-            # if self.selected_host is None:
-            #     self.show_config_dialog()
+            if not self.selected_host:
+                self.add_message("No host selected.")
+                return
 
-            if self.selected_host:
-                host_ip = self.selected_host['host_ip']
+            host_ip = self.selected_host['host_ip']
+            username = self.selected_host['user']
+            password = self.selected_host['password']
 
+            # Ping the host to check if it's reachable
+            if not self.ping_host(host_ip):
+                self.add_message(f"Host {host_ip} is unreachable.")
+                return
+
+            self.add_message(f"Host {host_ip} is reachable.")
+
+            # Validate the username and password
+            if not self.validate_credentials(host_ip, username, password):
+                self.add_message("Invalid credentials. Aborting.")
+                return
+
+            try:
+                devices_data = list_devices_on_host(
+                    host_ip,
+                    username,
+                    password
+                )
+            except Exception as e:
+                self.add_message(f"Unable to connect to host: {str(e)}")
+                return
+
+            # Get the list of attached devices from the 'usbip port' command on the client machine
+            try:
+                attached_devices = get_attached_devices()
+            except Exception as e:
+                self.add_message(f"Failed to retrieve attached devices: {str(e)}")
+                return
+
+            self.devices = []
+
+            # Loop through each device and check if it is already attached
+            for device_data in devices_data:
                 try:
-                    devices_data = list_devices_on_host(
-                        host_ip,
-                        self.selected_host['user'],
-                        self.selected_host['password']
-                    )
+                    # Pass host_ip to the Device constructor
+                    device = self.Device(device_data, host_ip)
+
+                    # Check if the device is already attached by matching busid and host_ip
+                    if is_device_attached(device.busid, device.host_ip, attached_devices):
+                        device.set_connected()  # Mark as connected by updating the 'connected' attribute
+                    else:
+                        device.set_disconnected()  # Mark as disconnected if not found in attached devices
+
+                    self.devices.append(device)
+
+                    # Create custom widget and add it as a list item
+                    device_widget = self.DeviceWidget(device)
+                    list_item = QListWidgetItem(self.device_list)
+                    list_item.setSizeHint(device_widget.sizeHint())
+                    self.device_list.addItem(list_item)
+                    self.device_list.setItemWidget(list_item, device_widget)
+
+                    # Update the widget's status based on the device's connection status
+                    device.update_widget_status(device_widget)
+
                 except Exception as e:
-                    self.add_message(f"Unable to connect to host: {str(e)}")
-                    return
+                    self.add_message(f"Error processing device: {device_data}")
 
-                # Get the list of attached devices from the 'usbip port' command on the client machine
-                try:
-                    attached_devices = get_attached_devices()
-                except Exception as e:
-                    self.add_message(f"Failed to retrieve attached devices: {str(e)}")
-                    return
-
-
-                self.devices = []
-
-                # Loop through each device and check if it is already attached
-                for device_data in devices_data:
-                    try:
-                        # print("DEVICE DATA: ", device_data)
-                        # Pass host_ip to the Device constructor
-                        device = self.Device(device_data, host_ip)
-
-                        # Check if the device is already attached by matching busid and host_ip
-                        if is_device_attached(device.busid, device.host_ip, attached_devices):
-                            device.set_connected()  # Mark as connected by updating the 'connected' attribute
-                        else:
-                            device.set_disconnected()  # Mark as disconnected if not found in attached devices
-
-                        self.devices.append(device)
-
-                        # Print the device details
-                        # print("DEVICE: ", device)
-
-                        # Create custom widget and add it as a list item
-                        device_widget = self.DeviceWidget(device)
-                        list_item = QListWidgetItem(self.device_list)
-                        list_item.setSizeHint(device_widget.sizeHint())
-                        self.device_list.addItem(list_item)
-                        self.device_list.setItemWidget(list_item, device_widget)
-
-                        # Update the widget's status based on the device's connection status
-                        device.update_widget_status(device_widget)
-
-                    except Exception as e:
-                        # print(f"Failed to process device {device_data}: {str(e)}")
-                        self.add_message(f"Error processing device: {device_data}")
-
-                for device in self.devices:
-                    if device.busid in self.auto_connect_devices and not device.connected:
-                        self.bind_unbind_device(device.host_ip, self.selected_host['user'],
-                                                self.selected_host['password'],
-                                                "bind", device.busid, False)
-                        device.set_connected()
+            # Auto-connect devices if configured
+            for device in self.devices:
+                if device.busid in self.auto_connect_devices and not device.connected:
+                    self.bind_unbind_device(device.host_ip, username, password, "bind", device.busid, False)
+                    device.set_connected()
 
         except Exception as e:
             self.add_message(f"An error occurred: {str(e)}")
-
-    def force_connect_device(self, item):
-        device_widget = self.device_list.itemWidget(item)  # Get the widget to access the Device object
-        if device_widget.device:
-            device = device_widget.device  # Retrieve the Device object
-
-            # Use the device's host_ip and busid for the connection
-            host_ip = device.host_ip
-            busid = device.busid
-            command = "bind"
-
-            # Call the bind/unbind method using the host_ip and busid
-            if self.bind_unbind_device(host_ip, self.selected_host['user'], self.selected_host['password'], command, busid, True):
-
-                # Update the widget with the green dot
-                item_widget = self.device_list.itemWidget(item)
-                if item_widget.device:
-                    item_widget.set_connected()
-                    device.set_connected()
 
     def connect_device(self, item):
         device_widget = self.device_list.itemWidget(item)  # Get the widget to access the Device object
@@ -1679,7 +1687,7 @@ class USBIPClient(QMainWindow):
                 menu.addAction("Detach", lambda: self.disconnect_device(item))
             else:
                 menu.addAction("Attach", lambda: self.connect_device(item))
-                menu.addAction("Force Attach", lambda: self.force_connect_device(item))
+                # menu.addAction("Force Attach", lambda: self.force_connect_device(item))
             if device.busid in self.auto_connect_devices:
                 menu.addAction("Remove from Auto-Connect", lambda: self.remove_auto_connect_device(device))
             else:
@@ -1713,17 +1721,29 @@ class USBIPClient(QMainWindow):
             print(f"Connected to {host_ip}. Executing command...")
             self.add_message(f"Connected to {host_ip}. Executing command...")
 
-            if force:
-                stdin, stdout, stderr = ssh.exec_command(f'sudo usbip unbind -b {busid}')
-                # Read the output once and store it
-                stdout_output = stdout.read().decode()
-                stderr_output = stderr.read().decode()
+            # if force:
+            #     stdin, stdout, stderr = ssh.exec_command(f'sudo usbip unbind -b {busid}')
+            #     # Read the output once and store it
+            #     stdout_output = stdout.read().decode()
+            #     stderr_output = stderr.read().decode()
+            #
+            #     # Print command output for debugging
+            #     print(f"Command output: {stdout_output}")
+            #     self.add_message(f"Command output: {stdout_output}")
+            #     print(f"Command error: {stderr_output}")
+            #     self.add_message(f"Command output: {stderr_output}")
 
-                # Print command output for debugging
-                print(f"Command output: {stdout_output}")
-                self.add_message(f"Command output: {stdout_output}")
-                print(f"Command error: {stderr_output}")
-                self.add_message(f"Command output: {stderr_output}")
+            # if force:
+            stdin, stdout, stderr = ssh.exec_command(f'sudo usbip unbind -b {busid}')
+            # Read the output once and store it
+            stdout_output = stdout.read().decode()
+            stderr_output = stderr.read().decode()
+
+            # Print command output for debugging
+            print(f"Command output: {stdout_output}")
+            self.add_message(f"Command output: {stdout_output}")
+            print(f"Command error: {stderr_output}")
+            self.add_message(f"Command output: {stderr_output}")
 
             # Execute the command
             stdin, stdout, stderr = ssh.exec_command(f'sudo usbip {command} -b {busid}')
@@ -2165,9 +2185,9 @@ class RestartThread(QThread):
             ssh.connect(self.host_ip, username=self.username, password=self.password)
 
             # Restart USBIP service
-            stdin, stdout, stderr = ssh.exec_command("sudo systemctl restart usbipd")
+            stdin, stdout, stderr = ssh.exec_command("sudo systemctl stop usbipd")
             # self.parent.add_message("Restarting USBIP Client... Success Message will appear when complete.")
-
+            stdin, stdout, stderr = ssh.exec_command("sudo systemctl start usbipd")
             # Capture the output
             output = stdout.read().decode()
             error = stderr.read().decode()
