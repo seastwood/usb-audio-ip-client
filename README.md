@@ -49,7 +49,11 @@ How to use:
       - Add to file: `vhci_hcd`
   - USBIP requires sudo to connect to devices. You can edit the sudoers file if you trust it (only way to use this gui currently)
     - run: `sudo visudo`
-    - Add to bottom of file: `<username> ALL=(ALL) NOPASSWD: /usr/sbin/usbip`
+    - Add to bottom of file (very important): 
+      ```
+      <username> ALL=(ALL) NOPASSWD: /usr/sbin/usbip
+      <username> ALL=(ALL) NOPASSWD: /usr/sbin/usbipd
+      ```
       - replace `<username>` with your username
 - If you have trouble, I recommend testing pipewire and usbip connections from the terminal to ensure your set up is working.
 - ssh port 20 and usbip pot 3240 must be allowed.
