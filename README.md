@@ -16,7 +16,7 @@ Note:
 - Tested/works on openSUSE. 
 - Tested/works on Fedora 41.
 - No other distributions tested
-- This does not connect to any servers, so you will need to periodically check for updates here and download the new executable.
+- You will need to periodically check for updates here and download the new executable.
 - The client is the one running the GUI. The server is the device with the usb devices physically plugged into it that are being sent to the client.
 
 How to use:
