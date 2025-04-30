@@ -8,7 +8,7 @@ My Specific Use Case:
 
 - I designed this because I want to use multiple USB devices and a microphone while game streaming with Moonlght/Sunshine on devices that don't allow device passthrough.
 This allows me to easily use devices like a Steam Controller and a microphone attached to my Raspberry Pie Zero 2 W while streaming with Moonlight on my TV or Phone. This also allows
-me to remotely interact on Discord with a push to talk button on the controller. 
+me to remotely interact on Discord with a push to talk button on the controller. (Note: I have since switched to using the open source VBAN Transmitter to send my microphone input)
 
 Special thanks to the developers of USBIP and Pipewire for making this possible.
 
