@@ -17,11 +17,11 @@ Note:
 - Tested/works on Fedora 41.
 - No other distributions tested
 - This does not connect to any servers, so you will need to periodically check for updates here and download the new executable.
-- The "client" device is the one running the GUI. The host is the device with the usb devices physically plugged into it.
+- The client is the one running the GUI. The server is the device with the usb devices physically plugged into it that are being sent to the client.
 
 How to use:
-- You must have ssh, Pipewire, and USBIP installed, enabled and started on the host device.
-  - ssh into the host device first and accept the fingerprint if you haven't already.
+- You must have ssh, Pipewire, and USBIP installed, enabled and started on the server.
+  - ssh into the server first and accept the fingerprint if you haven't already.
   - Make sure the usbip drivers are loaded:
     - `sudo modprobe vhci_hcd`
     - `sudo modprobe usbip_host`
@@ -42,7 +42,7 @@ How to use:
           WantedBy=multi-user.target
           ```
         - save, start, and enable it as usbipd.
-- Pipewire and USBIP must also be installed, enabled, and started on the client device.
+- Pipewire and USBIP must also be installed, enabled, and started on the client.
   - Make sure the usbip driver is loaded:
     - `sudo modprobe vhci_hcd`
     - To make them load on boot: `sudo nano /etc/modules-load.d/usbip.conf`
@@ -58,29 +58,29 @@ How to use:
 - If you have trouble, I recommend testing pipewire and usbip connections from the terminal to ensure your set up is working.
 - ssh port 20 and usbip pot 3240 must be allowed.
 - Download and run the executable in the dist folder.
-- Add host ip, username, and password.
-- If USBIP is set up correctly and USB devices are available on the host, devices should appear.
+- Add server host ip, username, and password.
+- If USBIP is set up correctly and USB devices are available on the server, devices should appear.
   - Sometimes you will need to restart the host usbip service to get it to actually work, so I added a button to do that.
-  - If that doesn't work, go to the host and check the status of usbipd `sudo systemctl status usbipd` it should be working and listening on port 3240.
+  - If that doesn't work, go to the server and check the status of usbipd `sudo systemctl status usbipd` it should be working and listening on port 3240.
   - I've had this randomly fail and needing to be manually restarted.
-  - I've also had to reboot the host device to get this to work.
+  - I've also had to reboot the server device to get this to work.
   - It's possible there could be an issue caused from having both ethernet and wifi active at the same time on the host device.
-- Configure pipewire host sink and client source settings. (The Apply-Enable-Test button will restart Pipewire on the host and client in order to enable the new modules)
+- Configure pipewire host sink and client source settings. (The Apply-Enable-Test button will restart Pipewire on the server and client in order to enable the new modules)
   - The only setting necessary to change is the Destination IPs in the Sender and Receiver tabs.
-    - In the Sender tab, set it to the other device ip.
-    - In the Receiver tab, set it to the GUI device ip.
-  - You may also want to adjust the Audio Rate to your preference, but I tried to optimize it.
+    - In the Sender tab, set it to the server device ip.
+    - In the Receiver tab, set it to the client device ip.
+  - You may also want to adjust the Audio Rate to your preference, but I tried to optimize it for microphone usage.
   - Once this is done, you should have a new input device called "RTP-source-receiver" (or whatever you changed it to) in your computer settings.
   - You should also have a new output device called RTP-sink-sender.
-- If Pipewire is set up correctly and audio devices are available, devices should appear in the lists. The following configuration only requires setting these settings on the Host Devices:
-  - To stream a microphone from the host, you want to link the INPUT device (if one is plugged in) to the SINK device you configured. Input -> RTP-sink-sender (It will not work the other way around).
-    - The configured sink device may not appear without an output device connected to the host.
+- If Pipewire is set up correctly and audio devices are available, devices should appear in the lists. The following configuration only requires setting these settings on the server-side devices:
+  - To stream a microphone from the server, you want to link the INPUT device (if one is plugged in) to the SINK device you configured. Input -> RTP-sink-sender (It will not work the other way around).
+    - The configured sink device may not appear without an output device connected to the server.
       - I am using a usb audio adapter with both a separate microphone and speaker plug, on which I only need to have a microphone plugged in.
       - I found that a headset adapter with a headset plugged in works as well.
     - You should see the link appear in the Host Linked Audio Devices list.
     - You should now be recieving sound through your new RTP-source-receiver input device on your pc.
-      - If it doesn't, try clicking "Restart Client PW" to allow the client to sync with the new host audio link.
-  - To stream sound back to the host device(sending it out of your pc) link the RTP-source-receiver to the output device. RTP-source-receiver -> output. (It will not work the other way around)
+      - If it doesn't, try clicking "Restart Client PW" to allow the client to sync with the new server audio link.
+  - To stream sound back to the server device(sending it out of your pc) link the RTP-source-receiver to the output device. RTP-source-receiver -> output. (It will not work the other way around)
   - Note: If you configured this through a Moonlight session, the session will need to be restarted. This is necessary to get the Sunshine Sink Streams to re-initialize because the Pipewire service was restarted during the stream.
 - All connections will remain connected even when the GUI is closed. The actual connections are made with USBIP and Pipewire.
 
