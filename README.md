@@ -56,11 +56,11 @@ How to use:
       ```
       - replace `<username>` with your username
 - If you have trouble, I recommend testing pipewire and usbip connections from the terminal to ensure your set up is working.
-- ssh port 20 and usbip pot 3240 must be allowed.
+- ssh port 20 and usbip port 3240 must be allowed.
 - Download and run the executable in the dist folder.
 - Add server host ip, username, and password.
 - If USBIP is set up correctly and USB devices are available on the server, devices should appear.
-  - Sometimes you will need to restart the host usbip service to get it to actually work, so I added a button to do that.
+  - Sometimes you will need to restart the server usbip service to get it to actually work, so I added a button to do that.
   - If that doesn't work, go to the server and check the status of usbipd `sudo systemctl status usbipd` it should be working and listening on port 3240.
   - I've had this randomly fail and needing to be manually restarted.
   - I've also had to reboot the server device to get this to work.
