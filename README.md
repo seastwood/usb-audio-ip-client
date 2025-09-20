@@ -35,8 +35,10 @@ How to use:
           After=network.target
 
           [Service]
-          ExecStart=/usr/sbin/usbipd -D
+          ExecStart=/usr/sbin/usbipd
+          Type=simple
           Restart=always
+          RestartSec=5
 
           [Install]
           WantedBy=multi-user.target
