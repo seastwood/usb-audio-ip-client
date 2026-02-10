@@ -15,6 +15,7 @@ Special thanks to the developers of USBIP and Pipewire for making this possible.
 Note: 
 - Tested/works on openSUSE. 
 - Tested/works on Fedora 41.
+- Tested/works on CachyOS/Arch
 - No other distributions tested
 - You will need to periodically check for updates here and download the new executable.
 - The client is the one running the GUI. The server is the device with the usb devices physically plugged into it that are being sent to the client.
