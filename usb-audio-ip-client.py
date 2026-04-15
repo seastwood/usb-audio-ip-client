@@ -5,12 +5,13 @@ import subprocess
 import paramiko
 
 from PyQt6.QtCore import Qt, QTime, QThread, pyqtSignal
-from PyQt6.QtGui import QAction
+from PyQt6.QtGui import QAction, QMovie
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QPushButton,
                              QListWidget, QMenu, QWidget, QLabel,
                              QComboBox, QHBoxLayout, QListWidgetItem, QMessageBox, QSpacerItem, QSizePolicy, QTabWidget,
                              QFrame, QScrollArea)
 from cryptography.fernet import Fernet
+from paramiko import AuthenticationException, SSHException, BadHostKeyException
 
 os.environ["PATH"] = "/usr/sbin:" + os.environ["PATH"]
 import os
@@ -444,6 +445,7 @@ class HostSinkConfigurationDialog(QDialog):
         self.parent_client.restart_client_pipewire()
         self.parent_client.restart_host_pipewire()
 
+
     def push_client_pw_source_settings(self):
         try:
             # Load the host sink configuration from the JSON file
@@ -657,29 +659,32 @@ class HostSinkConfigurationDialog(QDialog):
         # print(f"Command to send over SSH: {command}")
 
         # Establish SSH connection to the host
-        ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        # ssh = paramiko.SSHClient()
+        # ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
         # Debugging output: print SSH connection attempt
         # print(f"Connecting to {host_ip} with username {user}...")
-        ssh.connect(host_ip, username=user, password=password)
+        # ssh.connect(host_ip, username=user, password=password)
 
         # Execute the pw-cli command to load the RTP sink module on the remote host
-        stdin, stdout, stderr = ssh.exec_command(command)
+        # stdin, stdout, stderr = ssh.exec_command(command)
+
+        # command = "pw-cli load-module module-rtp-sink"
+        output = self.run_ssh_in_thread(host_ip, user, password, command)
 
         # Read the output and error streams
-        output = stdout.read().decode()
-        error = stderr.read().decode()
+        # output = stdout.read().decode()
+        # error = stderr.read().decode()
 
         # Debugging output: print the command output and error (if any)
-        if error:
-            # print(f"Error: {error}")
-            self.parent_client.add_message(f"Error: {error}")
-        else:
-            # print(f"Output: {output}")
-            # print("RTP sink module enabled successfully on remote host.")
-            self.parent_client.add_message(f"Output: {output}")
-            self.parent_client.add_message("RTP sink module enabled successfully on remote host.")
+        # if error:
+        #     # print(f"Error: {error}")
+        #     self.parent_client.add_message(f"Error: {error}")
+        # else:
+        #     # print(f"Output: {output}")
+        #     # print("RTP sink module enabled successfully on remote host.")
+        #     self.parent_client.add_message(f"Output: {output}")
+        #     self.parent_client.add_message("RTP sink module enabled successfully on remote host.")
 
         # Close the SSH connection
         # Execute the pw-cli command to load the RTP sink module on the remote host
@@ -698,7 +703,7 @@ class HostSinkConfigurationDialog(QDialog):
         #     self.parent_client.add_message(f"Output: {output}")
         #     self.parent_client.add_message("Pipewire successfully restarted on remote host.")
 
-        ssh.close()
+        # ssh.close()
 
         # Return the output for further inspection
         return output
@@ -766,29 +771,31 @@ class HostSinkConfigurationDialog(QDialog):
         # print(f"Command to send over SSH: {command}")
 
         # Establish SSH connection to the host
-        ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        # ssh = paramiko.SSHClient()
+        # ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
         # Debugging output: print SSH connection attempt
         # print(f"Connecting to {host_ip} with username {user}...")
-        ssh.connect(host_ip, username=user, password=password)
+        # ssh.connect(host_ip, username=user, password=password)
+        #
+        # # Execute the pw-cli command to load the RTP sink module on the remote host
+        # stdin, stdout, stderr = ssh.exec_command(command)
+        #
+        # # Read the output and error streams
+        # output = stdout.read().decode()
+        # error = stderr.read().decode()
+        #
+        # # Debugging output: print the command output and error (if any)
+        # if error:
+        #     # print(f"Error: {error}")
+        #     self.parent_client.add_message(f"Error: {error}")
+        # else:
+        #     # print(f"Output: {output}")
+        #     # print("RTP sink module enabled successfully on remote host.")
+        #     self.parent_client.add_message(f"Output: {output}")
+        #     self.parent_client.add_message("RTP source module enabled successfully on remote host.")
 
-        # Execute the pw-cli command to load the RTP sink module on the remote host
-        stdin, stdout, stderr = ssh.exec_command(command)
-
-        # Read the output and error streams
-        output = stdout.read().decode()
-        error = stderr.read().decode()
-
-        # Debugging output: print the command output and error (if any)
-        if error:
-            # print(f"Error: {error}")
-            self.parent_client.add_message(f"Error: {error}")
-        else:
-            # print(f"Output: {output}")
-            # print("RTP sink module enabled successfully on remote host.")
-            self.parent_client.add_message(f"Output: {output}")
-            self.parent_client.add_message("RTP source module enabled successfully on remote host.")
+        output = USBIPClient.run_ssh_in_thread(host_ip, user, password, command)
 
         # Close the SSH connection
         # # Execute the pw-cli command to load the RTP sink module on the remote host
@@ -807,7 +814,7 @@ class HostSinkConfigurationDialog(QDialog):
         #     self.parent_client.add_message(f"Output: {output}")
         #     self.parent_client.add_message("Pipewire successfully restarted on remote host.")
 
-        ssh.close()
+        # ssh.close()
 
         # Return the output for further inspection
         return output
@@ -940,47 +947,6 @@ class HostSinkConfigurationDialog(QDialog):
             )
 
 
-def list_devices_on_host(host_ip, user, password):
-    """List USB devices on the host and number them."""
-    devices = []
-
-    # Set up SSH connection
-    ssh = paramiko.SSHClient()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.connect(host_ip, username=user, password=password)
-
-    # Execute command to list USB devices
-    stdin, stdout, stderr = ssh.exec_command('sudo usbip list -l')
-
-    # Read and process the command output
-    output = stdout.readlines()
-    n = 0
-    device_info = ""
-    for line in output:
-        if line.startswith("Listing USB devices on host"):
-            continue
-        if line.strip() == "":
-            if device_info:
-                devices.append(device_info)
-                device_info = ""
-            continue
-        if 'busid' in line:
-            if device_info:
-                devices.append(device_info)
-            n += 1
-            device_info = f"{n} - {line.strip()}\n"
-        else:
-            device_info += f"{line.strip()}\n"
-
-    if device_info:
-        devices.append(device_info)
-
-
-    # Close SSH connection
-    ssh.close()
-    # print("DEVICES: ", devices)
-    return devices
-
 
 def get_attached_devices():
     """Executes 'sudo usbip port' on this machine and returns the attached devices with their host IP."""
@@ -1042,10 +1008,63 @@ def get_key():
             key_file.write(key)
     return key
 
+class SSHWorker(QThread):
+    finished = pyqtSignal(str)
+    error = pyqtSignal(str)
+    started_signal = pyqtSignal()
+
+    def __init__(self, host_ip, user, password, command, timeout=10):
+        super().__init__()
+        self.host_ip = host_ip
+        self.user = user
+        self.password = password
+        self.command = command
+        self.timeout = timeout
+
+    def run(self):
+        self.started_signal.emit()
+        ssh = None
+        try:
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            ssh.connect(self.host_ip, username=self.user, password=self.password, timeout=self.timeout)
+
+            stdin, stdout, stderr = ssh.exec_command(self.command)
+            output = ""
+            error = ""
+
+            channel = stdout.channel
+            while not channel.exit_status_ready():
+                if channel.recv_ready():
+                    output += channel.recv(1024).decode()
+                if channel.recv_stderr_ready():
+                    error += channel.recv_stderr(1024).decode()
+                self.msleep(50)
+
+            # Final read to get remaining output
+            while channel.recv_ready():
+                output += channel.recv(1024).decode()
+            while channel.recv_stderr_ready():
+                error += channel.recv_stderr(1024).decode()
+
+            if error:
+                self.error.emit(error.strip())
+            else:
+                self.finished.emit(output.strip())
+
+        except Exception as e:
+            self.error.emit(str(e))
+        finally:
+            if ssh:
+                ssh.close()
 
 class USBIPClient(QMainWindow):
     class Device:
         def __init__(self, device_data, host_ip):
+            # Initialize SSH worker to None
+            # self.ssh_worker = None
+
+
             device_data_parts = device_data.split()  # Split the string into words
             self.number = "Number: " + device_data_parts[0]
             self.busid = device_data_parts[4]
@@ -1099,9 +1118,18 @@ class USBIPClient(QMainWindow):
 
     def __init__(self):
         super().__init__()
+        self._ssh_validation_worker = None
+        self.ssh_worker = None
+
+        self.loading_movie = None
+        self.loading_label = None
+        # Setup loading icon
+        self.setup_loading_icon()
         self.auto_connect_devices = load_auto_connect_devices()
         self.setWindowTitle("USB-Audio-IP Client")
         self.setGeometry(100, 100, 500, 600)
+
+
 
         # Main widget and layout
         main_widget = QWidget()
@@ -1151,7 +1179,6 @@ class USBIPClient(QMainWindow):
 
         # Connect the currentIndexChanged signal to click_select_host
         self.host_dropdown.currentIndexChanged.connect(self.click_select_host)
-
         # Ensure the selected host matches the saved index
         last_selected_index = self.load_last_selected_host()
         if last_selected_index is not None and 0 <= last_selected_index < len(self.hosts):
@@ -1284,6 +1311,162 @@ class USBIPClient(QMainWindow):
         # Debug statement to confirm UI initialization
         print("Initialization complete.")
 
+    # def run_ssh_command(self, host_ip: str, user: str, password: str, command: str) -> str:
+    #     """
+    #     Connect to a remote host via SSH, execute a command, and return the output.
+    #
+    #     Parameters:
+    #         host_ip (str): IP address of the remote host
+    #         user (str): Username for SSH login
+    #         password (str): Password for SSH login
+    #         command (str): Command to execute on the remote host
+    #
+    #     Returns:
+    #         str: Standard output of the executed command
+    #     """
+    #     output = ""
+    #     try:
+    #         ssh = paramiko.SSHClient()
+    #         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    #
+    #         # Debug: connecting
+    #         self.add_message(f"Connecting to {host_ip} as {user}...")
+    #
+    #         ssh.connect(host_ip, username=user, password=password)
+    #
+    #         # Execute command
+    #         stdin, stdout, stderr = ssh.exec_command(command)
+    #         output = stdout.read().decode().strip()
+    #         error = stderr.read().decode().strip()
+    #
+    #         if error:
+    #             self.add_message(f"Error executing command: {error}")
+    #         else:
+    #             self.add_message(f"Output: {output}")
+    #             self.add_message("Command executed successfully on remote host.")
+    #
+    #     except AuthenticationException:
+    #         self.add_message("SSH Authentication failed. Check username/password.")
+    #     except SSHException as e:
+    #         self.add_message(f"SSH connection error: {str(e)}")
+    #     except BadHostKeyException:
+    #         self.add_message("SSH connection failed due to host key verification.")
+    #     except Exception as e:
+    #         self.add_message(f"Unexpected error: {str(e)}")
+    #     finally:
+    #         try:
+    #             ssh.close()
+    #         except Exception:
+    #             pass  # Ignore if ssh was never successfully created
+    #
+    #     return output
+
+    def run_ssh_in_thread(self, host_ip, user, password, command):
+        # Show loading icon
+        self.show_loading(True)
+
+        # Create the worker
+        self.ssh_worker = SSHWorker(host_ip, user, password, command)
+        self.ssh_worker.finished.connect(self.on_ssh_finished)
+        self.ssh_worker.error.connect(self.on_ssh_error)
+        self.ssh_worker.started_signal.connect(lambda: self.add_message("SSH command started..."))
+
+        # Start the worker thread
+        self.ssh_worker.start()
+
+    def on_ssh_finished(self, output):
+        self.add_message(f"Output: {output}")
+        self.add_message("Command executed successfully on remote host.")
+        self.show_loading(False)  # Hide loading icon
+
+    def on_ssh_error(self, error_msg):
+        self.add_message(f"Error: {error_msg}")
+        self.show_loading(False)  # Hide loading icon
+
+    def list_devices_on_host_threaded(self, host_ip, user, password):
+        """Start a threaded SSH command to list USB devices."""
+        command = "sudo usbip list -l"
+
+        self.ssh_worker = SSHWorker(host_ip, user, password, command)
+        self.ssh_worker.started_signal.connect(lambda: self.show_loading(True))
+        self.ssh_worker.finished.connect(self.on_devices_received)
+        self.ssh_worker.error.connect(self.on_ssh_error)
+        self.ssh_worker.start()
+
+    def on_devices_received(self, output: str):
+        self.show_loading(False)  # hide spinner
+
+        # Clear previous list
+        self.device_list.clear()
+        self.devices = []
+
+        host_ip = self.selected_host['host_ip']
+        attached_devices = get_attached_devices()  # local attached USB devices
+
+        devices_data = []
+        n = 0
+        device_info = ""
+        for line in output.splitlines():
+            if line.startswith("Listing USB devices on host"):
+                continue
+            if line.strip() == "":
+                if device_info:
+                    devices_data.append(device_info)
+                    device_info = ""
+                continue
+            if "busid" in line:
+                if device_info:
+                    devices_data.append(device_info)
+                n += 1
+                device_info = f"{n} - {line.strip()}\n"
+            else:
+                device_info += f"{line.strip()}\n"
+        if device_info:
+            devices_data.append(device_info)
+
+        # Create Device objects and DeviceWidgets
+        for device_str in devices_data:
+            device = self.Device(device_str, host_ip)
+
+            if is_device_attached(device.busid, device.host_ip, attached_devices):
+                device.set_connected()
+            else:
+                device.set_disconnected()
+
+            self.devices.append(device)
+
+            widget = self.DeviceWidget(device)
+            item = QListWidgetItem(self.device_list)
+            item.setSizeHint(widget.sizeHint())
+            self.device_list.addItem(item)
+            self.device_list.setItemWidget(item, widget)
+            device.update_widget_status(widget)
+
+    def update_device_list(self, devices):
+        """Example: update QListWidget or your device widgets."""
+        # Clear existing items
+        # self.device_list_widget.clear()
+
+        for device in devices:
+            # Here you can create Device objects or DeviceWidget
+            print("DEVICE:", device)
+            self.add_message(device)  # or update GUI
+
+    def setup_loading_icon(self):
+        self.loading_label = QLabel(self)
+        self.loading_label.setGeometry(200, 200, 64, 64)  # Adjust position/size
+        self.loading_movie = QMovie("loading_spinner.gif")
+        self.loading_label.setMovie(self.loading_movie)
+        self.loading_label.hide()  # Start hidden
+
+    def show_loading(self, visible: bool):
+        if visible:
+            self.loading_label.show()
+            self.loading_movie.start()
+        else:
+            self.loading_movie.stop()
+            self.loading_label.hide()
+
     def load_last_selected_host(self):
         """Load the last selected host index from a configuration file."""
         try:
@@ -1320,58 +1503,46 @@ class USBIPClient(QMainWindow):
         self.messages_list.addItem(item)
 
     def restart_host_pipewire(self):
-        """Handle the restart of USBIP service and refresh the device list."""
-        # print("Restarting Host Pipewire...")
+        """Restart Host Pipewire service using the threaded SSHWorker."""
 
-        # # Ensure a host is selected
-        # if self.selected_host is None:
-        #     self.show_config_dialog()
-        #     return
+        if self.selected_host is None:
+            self.add_message("No host selected.")
+            return
 
         host_ip = self.selected_host['host_ip']
         username = self.selected_host['user']
         password = self.selected_host['password']
 
-        try:
-            # print(f"Attempting to connect to {host_ip} with user {username}")
-            self.add_message(f"Attempting to connect to {host_ip} with user {username}")
-            ssh = paramiko.SSHClient()
+        self.add_message(f"Attempting to connect to {host_ip} with user {username}...")
 
-            # Set missing host key policy to auto add
-            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        command = "systemctl --user restart pipewire"
 
-            # Connect to the remote SSH server
-            ssh.connect(host_ip, username=username, password=password)
-            # print(f"Connected to {host_ip}. Restarting Host Pipewire service...")
-            self.add_message(f"Connected to {host_ip}. Restarting Host Pipewire service...")
+        # Create the SSH worker
+        worker = SSHWorker(host_ip, username, password, command)
 
-            # Execute the command to restart the USBIP service
-            stdin, stdout, stderr = ssh.exec_command("systemctl --user restart pipewire")
-            # stdin.write(f"{password}\n")  # Provide password for sudo
-            # stdin.flush()
+        # Show loading spinner when worker starts
+        worker.started_signal.connect(lambda: self.show_loading(True))
 
-            # Capture command output and error
-            output = stdout.read().decode()
-            error = stderr.read().decode()
+        # Handle successful execution
+        def on_finished(output):
+            self.show_loading(False)
+            if output.strip():
+                self.add_message(f"Output: {output.strip()}")
+            self.add_message("Host Pipewire service restarted successfully.")
+            # Refresh linked devices after restart
+            self.refresh_host_linked_devices()
 
-            if error:
-                self.add_message(f"Failed to restart Host Pipewire service: {error}")
-            else:
-                # print(f"Host Pipewire service restarted successfully: {output}")
-                self.add_message("Host Pipewire service restarted successfully.")
+        worker.finished.connect(on_finished)
 
-                # Refresh the device list after restarting the USBIP service
-                # self.refresh_audio_devices()
-                self.refresh_host_linked_devices()
+        # Handle errors
+        def on_error(err_msg):
+            self.show_loading(False)
+            self.add_message(f"Failed to restart Host Pipewire service: {err_msg}")
 
-        except paramiko.SSHException as e:
-            self.add_message(f"SSH connection error: {e}")
-        except Exception as e:
-            self.add_message(f"Error restarting Host Pipewire service: {str(e)}")
-        finally:
-            ssh.close()
-            # print("SSH connection closed.")
-            self.add_message("SSH connection closed.")
+        worker.error.connect(on_error)
+
+        # Start the worker thread
+        worker.start()
 
     def restart_usbip(self):
         """Handle the restart of USBIP service and refresh the device list."""
@@ -1526,88 +1697,139 @@ class USBIPClient(QMainWindow):
             self.add_message(f"Error while pinging host {host_ip}: {e}")
             return False
 
-    def validate_credentials(self, host_ip, username, password):
-        """Validate the username and password by attempting a lightweight SSH connection."""
-        try:
-            # Create an SSH client
-            ssh = paramiko.SSHClient()
-            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    def validate_credentials_threaded(self, host_ip, username, password, callback):
+        """
+        Validate SSH credentials using the threaded SSHWorker.
 
-            # Attempt to connect to the host
-            ssh.connect(host_ip, username=username, password=password, timeout=10)
-            ssh.close()  # Close the connection if successful
-            return True
-        except paramiko.AuthenticationException:
-            self.add_message("Authentication failed: Incorrect username or password.")
-            return False
-        except Exception as e:
-            self.add_message(f"Failed to validate credentials: {str(e)}")
-            return False
+        Parameters:
+            host_ip (str): IP of the host to validate
+            username (str): SSH username
+            password (str): SSH password
+            callback (function): function(bool) called with True if credentials are valid
+        """
+
+        # Don't start a new worker if one is already running
+        if getattr(self, "_ssh_validation_worker", None) is not None:
+            self.add_message("Credential validation already in progress...")
+            return
+
+        command = "echo validate_credentials"  # lightweight command
+
+        # Keep a persistent reference to the worker
+        self._ssh_validation_worker = SSHWorker(host_ip, username, password, command)
+        worker = self._ssh_validation_worker
+
+        # Show loading indicator when worker starts
+        worker.started_signal.connect(lambda: self.show_loading(True))
+
+        # Define success handler
+        def on_finished(output):
+            self.show_loading(False)
+            self.add_message(f"Credentials validated for {host_ip}.")
+            callback(True)
+            cleanup_worker()
+
+        # Define error handler
+        def on_error(err_msg):
+            self.show_loading(False)
+            self.add_message(f"Credential validation failed: {err_msg}")
+            callback(False)
+            cleanup_worker()
+
+        # Disconnect signals and clear reference
+        def cleanup_worker():
+            worker.finished.disconnect()
+            worker.error.disconnect()
+            worker.started_signal.disconnect()
+            self._ssh_validation_worker = None
+
+        # Connect signals
+        worker.finished.connect(on_finished)
+        worker.error.connect(on_error)
+
+        # Start the worker
+        worker.start()
 
     def refresh_device_list(self):
+        """Start device refresh for the selected host."""
         self.device_list.clear()
+        if not self.selected_host:
+            self.add_message("No host selected.")
+            return
+
+        host_ip = self.selected_host['host_ip']
+        username = self.selected_host['user']
+        password = self.selected_host['password']
+
+        if not self.ping_host(host_ip):
+            self.add_message(f"Host {host_ip} is unreachable.")
+            return
+
+        self.add_message(f"Host {host_ip} is reachable.")
+
+        self.validate_credentials_threaded(host_ip, username, password, callback=lambda valid: (
+            self.add_message("Aborting due to invalid credentials.")
+        ))
+
+        # Start SSH thread to list devices
         try:
-            if not self.selected_host:
-                self.add_message("No host selected.")
-                return
+            self.list_devices_on_host_threaded(host_ip, username, password)
+        except Exception as e:
+            self.add_message(f"Unable to connect to host: {str(e)}")
+            return
 
+        def on_devices_received(self, output: str):
+            """Called when SSHWorker finishes: parse devices and update GUI."""
+            self.show_loading(False)
+
+            # Split SSH output into device lines
+            devices_data = []
+            n = 0
+            device_info = ""
             host_ip = self.selected_host['host_ip']
-            username = self.selected_host['user']
-            password = self.selected_host['password']
 
-            # Ping the host to check if it's reachable
-            if not self.ping_host(host_ip):
-                self.add_message(f"Host {host_ip} is unreachable.")
-                return
+            for line in output.splitlines():
+                if line.startswith("Listing USB devices on host"):
+                    continue
+                if line.strip() == "":
+                    if device_info:
+                        devices_data.append(device_info)
+                        device_info = ""
+                    continue
+                if 'busid' in line:
+                    if device_info:
+                        devices_data.append(device_info)
+                    n += 1
+                    device_info = f"{n} - {line.strip()}\n"
+                else:
+                    device_info += f"{line.strip()}\n"
 
-            self.add_message(f"Host {host_ip} is reachable.")
+            if device_info:
+                devices_data.append(device_info)
 
-            # Validate the username and password
-            if not self.validate_credentials(host_ip, username, password):
-                self.add_message("Invalid credentials. Aborting.")
-                return
-
-            try:
-                devices_data = list_devices_on_host(
-                    host_ip,
-                    username,
-                    password
-                )
-            except Exception as e:
-                self.add_message(f"Unable to connect to host: {str(e)}")
-                return
-
-            # Get the list of attached devices from the 'usbip port' command on the client machine
-            try:
-                attached_devices = get_attached_devices()
-            except Exception as e:
-                self.add_message(f"Failed to retrieve attached devices: {str(e)}")
-                return
-
+            # Update devices list and GUI
             self.devices = []
+            attached_devices = get_attached_devices()  # check local attached devices
 
-            # Loop through each device and check if it is already attached
             for device_data in devices_data:
                 try:
-                    # Pass host_ip to the Device constructor
                     device = self.Device(device_data, host_ip)
 
-                    # Check if the device is already attached by matching busid and host_ip
+                    # mark as connected if already attached
                     if is_device_attached(device.busid, device.host_ip, attached_devices):
-                        device.set_connected()  # Mark as connected by updating the 'connected' attribute
+                        device.set_connected()
                     else:
-                        device.set_disconnected()  # Mark as disconnected if not found in attached devices
+                        device.set_disconnected()
 
                     self.devices.append(device)
 
-                    # Create custom widget and add it as a list item
+                    # create widget for the device
                     device_widget = self.DeviceWidget(device)
                     list_item = QListWidgetItem(self.device_list)
                     list_item.setSizeHint(device_widget.sizeHint())
                     self.device_list.addItem(list_item)
                     self.device_list.setItemWidget(list_item, device_widget)
 
-                    # Update the widget's status based on the device's connection status
                     device.update_widget_status(device_widget)
 
                 except Exception as e:
@@ -1616,11 +1838,88 @@ class USBIPClient(QMainWindow):
             # Auto-connect devices if configured
             for device in self.devices:
                 if device.busid in self.auto_connect_devices and not device.connected:
-                    self.bind_unbind_device(device.host_ip, username, password, "bind", device.busid, False)
+                    self.bind_unbind_device(device.host_ip, self.selected_host['user'],
+                                            self.selected_host['password'], "bind",
+                                            device.busid, False)
                     device.set_connected()
 
-        except Exception as e:
-            self.add_message(f"An error occurred: {str(e)}")
+    # def refresh_device_list(self):
+    #     self.device_list.clear()
+    #     try:
+    #         if not self.selected_host:
+    #             self.add_message("No host selected.")
+    #             return
+    #
+    #         host_ip = self.selected_host['host_ip']
+    #         username = self.selected_host['user']
+    #         password = self.selected_host['password']
+    #
+    #         # Ping the host to check if it's reachable
+    #         if not self.ping_host(host_ip):
+    #             self.add_message(f"Host {host_ip} is unreachable.")
+    #             return
+    #
+    #         self.add_message(f"Host {host_ip} is reachable.")
+    #
+    #         # Validate the username and password
+    #         if not self.validate_credentials(host_ip, username, password):
+    #             self.add_message("Invalid credentials. Aborting.")
+    #             return
+    #
+    #         try:
+    #             self.list_devices_on_host_threaded(
+    #                 host_ip,
+    #                 username,
+    #                 password
+    #             )
+    #         except Exception as e:
+    #             self.add_message(f"Unable to connect to host: {str(e)}")
+    #             return
+    #
+    #         # Get the list of attached devices from the 'usbip port' command on the client machine
+    #         try:
+    #             attached_devices = get_attached_devices()
+    #         except Exception as e:
+    #             self.add_message(f"Failed to retrieve attached devices: {str(e)}")
+    #             return
+    #
+    #         self.devices = []
+    #
+    #         # Loop through each device and check if it is already attached
+    #         for device_data in devices_data:
+    #             try:
+    #                 # Pass host_ip to the Device constructor
+    #                 device = self.Device(device_data, host_ip)
+    #
+    #                 # Check if the device is already attached by matching busid and host_ip
+    #                 if is_device_attached(device.busid, device.host_ip, attached_devices):
+    #                     device.set_connected()  # Mark as connected by updating the 'connected' attribute
+    #                 else:
+    #                     device.set_disconnected()  # Mark as disconnected if not found in attached devices
+    #
+    #                 self.devices.append(device)
+    #
+    #                 # Create custom widget and add it as a list item
+    #                 device_widget = self.DeviceWidget(device)
+    #                 list_item = QListWidgetItem(self.device_list)
+    #                 list_item.setSizeHint(device_widget.sizeHint())
+    #                 self.device_list.addItem(list_item)
+    #                 self.device_list.setItemWidget(list_item, device_widget)
+    #
+    #                 # Update the widget's status based on the device's connection status
+    #                 device.update_widget_status(device_widget)
+    #
+    #             except Exception as e:
+    #                 self.add_message(f"Error processing device: {device_data}")
+    #
+    #         # Auto-connect devices if configured
+    #         for device in self.devices:
+    #             if device.busid in self.auto_connect_devices and not device.connected:
+    #                 self.bind_unbind_device(device.host_ip, username, password, "bind", device.busid, False)
+    #                 device.set_connected()
+    #
+    #     except Exception as e:
+    #         self.add_message(f"An error occurred: {str(e)}")
 
     def connect_device(self, item):
         device_widget = self.device_list.itemWidget(item)  # Get the widget to access the Device object
