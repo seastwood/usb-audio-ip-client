@@ -104,3 +104,5 @@ To do:
 - Make more object oriented.
 - Better Error Handling
 - More Feedback Messages (semi-done, could improve the error checks to better indicate why an issue occurs)
+
+buymeacoffee.com/eastwoodsee
